@@ -29,7 +29,7 @@
     <inceptionYear>2012</inceptionYear>
     <groupId>org.apache.rocketmq</groupId>
     <artifactId>rocketmq-all</artifactId>
-    <version>4.2.1-SNAPSHOT</version>
+    <version>4.2.0</version>
     <packaging>pom</packaging>
     <name>Apache RocketMQ ${project.version}</name>
     <url>http://rocketmq.apache.org/</url>
@@ -42,7 +42,7 @@
         <url>git@github.com:apache/rocketmq.git</url>
         <connection>scm:git:git@github.com:apache/rocketmq.git</connection>
         <developerConnection>scm:git:git@github.com:apache/rocketmq.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>rocketmq-all-4.2.0</tag>
     </scm>
 
     <mailingLists>
@@ -127,7 +127,7 @@
         <module>openmessaging</module>
     </modules>
 
-    <build>
+<!--     <build>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -260,7 +260,7 @@
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>3.0.2</version>
                 <configuration>
-                    <!-- We are not suppose to setup the customer resources here-->
+                    We are not suppose to setup the customer resources here
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
@@ -352,15 +352,15 @@
                 </plugin>
             </plugins>
         </pluginManagement>
-    </build>
+    </build> -->
 
-    <profiles>
+ <!--    <profiles>
         <profile>
             <id>jdk8</id>
             <activation>
                 <jdk>[1.8,)</jdk>
             </activation>
-            <!-- Disable doclint under JDK 8 -->
+            Disable doclint under JDK 8
             <reporting>
                 <plugins>
                     <plugin>
@@ -438,11 +438,11 @@
         <profile>
             <id>sonar-apache</id>
             <properties>
-                <!-- URL of the ASF SonarQube server -->
+                URL of the ASF SonarQube server
                 <sonar.host.url>https://builds.apache.org/analysis</sonar.host.url>
             </properties>
         </profile>
-    </profiles>
+    </profiles> -->
 
     <dependencies>
         <dependency>
