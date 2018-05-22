@@ -16,14 +16,18 @@
  */
 
 package org.apache.rocketmq.remoting.protocol;
-
+/**
+ * 语言代码
+ * @author yuyang
+ * @date 2018年5月23日
+ */
 public enum LanguageCode {
-    JAVA((byte) 0),
+    JAVA((byte) 0),//java 
     CPP((byte) 1),
-    DOTNET((byte) 2),
+    DOTNET((byte) 2),//.NET
     PYTHON((byte) 3),
     DELPHI((byte) 4),
-    ERLANG((byte) 5),
+    ERLANG((byte) 5),//一种面向并发的编程语言
     RUBY((byte) 6),
     OTHER((byte) 7),
     HTTP((byte) 8),
@@ -36,7 +40,13 @@ public enum LanguageCode {
         this.code = code;
     }
 
+    /**
+     * 根据传入的code 获取对应的枚举类
+     * @param code
+     * @return
+     */
     public static LanguageCode valueOf(byte code) {
+    	//LanguageCode.values() 是获取所拥有的枚举类型
         for (LanguageCode languageCode : LanguageCode.values()) {
             if (languageCode.getCode() == code) {
                 return languageCode;
@@ -44,7 +54,10 @@ public enum LanguageCode {
         }
         return null;
     }
-
+    /**
+     * 根据枚举类获取它自己封装的code
+     * @return
+     */
     public byte getCode() {
         return code;
     }

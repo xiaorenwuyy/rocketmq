@@ -18,12 +18,31 @@ package org.apache.rocketmq.broker.client;
 
 import io.netty.channel.Channel;
 import org.apache.rocketmq.remoting.protocol.LanguageCode;
-
+/**
+ * 客户端渠道信息类
+ * @author yuyang
+ * @date 2018年5月23日
+ */
 public class ClientChannelInfo {
+	/**
+	 * 渠道
+	 */
     private final Channel channel;
+    /**
+     * 客户端id
+     */
     private final String clientId;
+    /**
+     * 语言  用的枚举类
+     */
     private final LanguageCode language;
+    /**
+     * 版本
+     */
     private final int version;
+    /**
+     * 最后修改时间
+     */
     private volatile long lastUpdateTimestamp = System.currentTimeMillis();
 
     public ClientChannelInfo(Channel channel) {
@@ -79,9 +98,12 @@ public class ClientChannelInfo {
             return true;
         if (obj == null)
             return false;
+        //加入一个判断其类型的条件
         if (getClass() != obj.getClass())
             return false;
-        ClientChannelInfo other = (ClientChannelInfo) obj;
+        ClientChannelInfo other = (ClientChannelInfo) obj; 
+        
+        //对channel 属性做了特殊的判断，正反两个方面判断
         if (channel == null) {
             if (other.channel != null)
                 return false;

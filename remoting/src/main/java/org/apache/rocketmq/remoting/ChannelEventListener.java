@@ -17,13 +17,43 @@
 package org.apache.rocketmq.remoting;
 
 import io.netty.channel.Channel;
-
+/**
+ * 渠道事件监听器  
+ * 注意：方法参数是个final 类型的
+ * @author yuyang
+ * @date 2018年5月23日
+ */
 public interface ChannelEventListener {
+	/**
+	 * 渠道连接事件
+	 * @param  remoteAddr  远程地址，是个字符串
+	 * @param  channel    netty 的 渠道类channel 
+	 * @return void      
+	 * @throws
+	 */
     void onChannelConnect(final String remoteAddr, final Channel channel);
-
+	/**
+	 * 渠道关闭事件
+	 * @param  remoteAddr  远程地址，是个字符串
+	 * @param  channel    netty 的 渠道类channel 
+	 * @return void      
+	 * @throws
+	 */
     void onChannelClose(final String remoteAddr, final Channel channel);
-
+	/**
+	 * 渠道抛错事件
+	 * @param  remoteAddr  远程地址，是个字符串
+	 * @param  channel    netty 的 渠道类channel 
+	 * @return void      
+	 * @throws
+	 */
     void onChannelException(final String remoteAddr, final Channel channel);
-
+	/**
+	 * 渠道空闲事件
+	 * @param  remoteAddr  远程地址，是个字符串
+	 * @param  channel    netty 的 渠道类channel 
+	 * @return void      
+	 * @throws
+	 */
     void onChannelIdle(final String remoteAddr, final Channel channel);
 }

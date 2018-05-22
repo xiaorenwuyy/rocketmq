@@ -15,7 +15,11 @@
  * limitations under the License.
  */
 package org.apache.rocketmq.common.constant;
-
+/**
+ * 日志常量类
+ * @author yuyang
+ * @date 2018年5月23日
+ */
 public class LoggerName {
     public static final String FILTERSRV_LOGGER_NAME = "RocketmqFiltersrv";
     public static final String NAMESRV_LOGGER_NAME = "RocketmqNamesrv";
