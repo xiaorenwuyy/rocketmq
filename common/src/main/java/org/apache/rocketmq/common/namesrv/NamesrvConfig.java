@@ -25,12 +25,18 @@ import org.apache.rocketmq.common.MixAll;
 import org.apache.rocketmq.common.constant.LoggerName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * 命名空间配置类
+ * @author yuyang
+ * @date 2018年5月24日
+ */
 public class NamesrvConfig {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.NAMESRV_LOGGER_NAME);
-
+    //mq 的主地址  getenv 是获取环境变量的值 如 JAVA_HOME 等 可以配置，getProperty 是获取 系统属性的值 如os.name 等   不可 配置
     private String rocketmqHome = System.getProperty(MixAll.ROCKETMQ_HOME_PROPERTY, System.getenv(MixAll.ROCKETMQ_HOME_ENV));
+    //key value json 配置文件路径
     private String kvConfigPath = System.getProperty("user.home") + File.separator + "namesrv" + File.separator + "kvConfig.json";
+    //配置中心路径
     private String configStorePath = System.getProperty("user.home") + File.separator + "namesrv" + File.separator + "namesrv.properties";
     private String productEnvName = "center";
     private boolean clusterTest = false;

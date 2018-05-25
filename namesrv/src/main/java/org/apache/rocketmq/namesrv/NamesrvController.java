@@ -34,12 +34,16 @@ import org.apache.rocketmq.remoting.netty.NettyRemotingServer;
 import org.apache.rocketmq.remoting.netty.NettyServerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * nameserver controller 
+ * @author yuyang
+ * @date 2018年5月25日
+ */
 public class NamesrvController {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.NAMESRV_LOGGER_NAME);
-
+    //nameserver 配置类
     private final NamesrvConfig namesrvConfig;
-
+    //netty 通信服务器配置类
     private final NettyServerConfig nettyServerConfig;
 
     private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryImpl(
@@ -52,7 +56,7 @@ public class NamesrvController {
     private BrokerHousekeepingService brokerHousekeepingService;
 
     private ExecutorService remotingExecutor;
-
+    //总的配置类
     private Configuration configuration;
 
     public NamesrvController(NamesrvConfig namesrvConfig, NettyServerConfig nettyServerConfig) {
@@ -60,16 +64,20 @@ public class NamesrvController {
         this.nettyServerConfig = nettyServerConfig;
         this.kvConfigManager = new KVConfigManager(this);
         this.routeInfoManager = new RouteInfoManager();
-        this.brokerHousekeepingService = new BrokerHousekeepingService(this);
+        this.brokerHousekeepingService = new BrokerHousekeepingService(this);//放入nameserver controller 的引用备后用
         this.configuration = new Configuration(
             log,
             this.namesrvConfig, this.nettyServerConfig
         );
         this.configuration.setStorePathFromConfig(this.namesrvConfig, "configStorePath");
     }
-
+    /**
+     * controller 初始化
+     * @return boolean      
+     * @throws
+     */
     public boolean initialize() {
-
+    	//key value 配置管理器 把配置项放入也配置表中
         this.kvConfigManager.load();
 
         this.remotingServer = new NettyRemotingServer(this.nettyServerConfig, this.brokerHousekeepingService);

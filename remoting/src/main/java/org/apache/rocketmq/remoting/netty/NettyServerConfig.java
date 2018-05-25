@@ -15,13 +15,22 @@
  * limitations under the License.
  */
 package org.apache.rocketmq.remoting.netty;
-
+/**
+ * netty 服务器配置
+ * @author yuyang
+ * @date 2018年5月25日
+ */
 public class NettyServerConfig implements Cloneable {
+	//监听端口
     private int listenPort = 8888;
+    //工作线程数量
     private int serverWorkerThreads = 8;
+    //netty 服务器callback 执行线程数
     private int serverCallbackExecutorThreads = 0;
     private int serverSelectorThreads = 3;
+    //服务器单笔最大
     private int serverOnewaySemaphoreValue = 256;
+    //服务器异步最大
     private int serverAsyncSemaphoreValue = 64;
     private int serverChannelMaxIdleTimeSeconds = 120;
 
@@ -31,7 +40,7 @@ public class NettyServerConfig implements Cloneable {
 
     /**
      * make make install
-     *
+     * 默认是没有用epoll 的
      *
      * ../glibc-2.10.1/configure \ --prefix=/usr \ --with-headers=/usr/include \
      * --host=x86_64-linux-gnu \ --build=x86_64-pc-linux-gnu \ --without-gd

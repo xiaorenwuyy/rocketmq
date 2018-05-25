@@ -23,14 +23,24 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-
+/**
+ * 服务工具类 主要给启动命令用的
+ * @author yuyang
+ * @date 2018年5月24日
+ */
 public class ServerUtil {
-
+	/**
+	 * 构建命令行属性 有 h-help 和 n name server 帮助和nameserver
+	 * @param  options    
+	 * @return Options      
+	 * @throws
+	 */
     public static Options buildCommandlineOptions(final Options options) {
-        Option opt = new Option("h", "help", false, "Print help");
-        opt.setRequired(false);
+        Option opt = new Option("h", "help", false, "Print help");//帮助
+        opt.setRequired(false);//false 可选
         options.addOption(opt);
-
+        
+        //nameserver 列表
         opt =
             new Option("n", "namesrvAddr", true,
                 "Name server address list, eg: 192.168.0.1:9876;192.168.0.2:9876");
@@ -39,22 +49,32 @@ public class ServerUtil {
 
         return options;
     }
-
+    /**
+     * 解析命令行，分别传入
+     * @param  appName  在命令行帮助栏中显示 usage 后面
+     * @param  args  命令行传入的参数
+     * @param  options  服务已经构建的属性项目
+     * @param  parser   命令行参数解析器
+     * @return CommandLine   解析成功会返回命令行，如果解析成功则打印帮助信息然后返回初始化为null的命令行 commandline   
+     * @throws
+     */
     public static CommandLine parseCmdLine(final String appName, String[] args, Options options,
         CommandLineParser parser) {
-        HelpFormatter hf = new HelpFormatter();
+        HelpFormatter hf = new HelpFormatter();//打印格式化 器
         hf.setWidth(110);
         CommandLine commandLine = null;
         try {
+        	//用命令行解析器去解析传入的参数
             commandLine = parser.parse(options, args);
+            //判断是否传入h 属性,如果有传入则打印出帮助信息
             if (commandLine.hasOption('h')) {
                 hf.printHelp(appName, options, true);
                 return null;
             }
-        } catch (ParseException e) {
+        } catch (ParseException e) {//解析报错，也要打印出帮助信息
             hf.printHelp(appName, options, true);
         }
-
+        
         return commandLine;
     }
 

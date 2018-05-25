@@ -26,17 +26,23 @@ import java.util.Properties;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.slf4j.Logger;
-
+/**
+ * 总的配置类
+ * @author yuyang
+ * @date 2018年5月25日
+ */
 public class Configuration {
 
     private final Logger log;
-
+    //保存配置类列表
     private List<Object> configObjectList = new ArrayList<Object>(4);
     private String storePath;
     private boolean storePathFromConfig = false;
     private Object storePathObject;
+    //nameserver 配置类保存文件的路径属性
     private Field storePathField;
     private DataVersion dataVersion = new DataVersion();
+    //读写锁
     private ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     /**
      * All properties include configs in object and extend properties.
@@ -46,7 +52,11 @@ public class Configuration {
     public Configuration(Logger log) {
         this.log = log;
     }
-
+    /**
+     * 配置类构造函数
+     * @param log
+     * @param configObjects
+     */
     public Configuration(Logger log, Object... configObjects) {
         this.log = log;
         if (configObjects == null || configObjects.length == 0) {
@@ -63,13 +73,13 @@ public class Configuration {
     }
 
     /**
-     * register config object
+     * register config object   合并了一下配置项并把配置类保存了下来锁
      *
      * @return the current Configuration object
      */
     public Configuration registerConfig(Object configObject) {
         try {
-            readWriteLock.writeLock().lockInterruptibly();
+            readWriteLock.writeLock().lockInterruptibly();//写锁
 
             try {
 
@@ -81,7 +91,7 @@ public class Configuration {
             } finally {
                 readWriteLock.writeLock().unlock();
             }
-        } catch (InterruptedException e) {
+        } catch (InterruptedException e) {//try catch 专为lock 锁设置
             log.error("registerConfig lock error");
         }
         return this;
@@ -89,7 +99,7 @@ public class Configuration {
 
     /**
      * register config properties
-     *
+     * 把全部的属性项设置合并到全部属性信息中，这个可能就涵盖了配置类的
      * @return the current Configuration object
      */
     public Configuration registerConfig(Properties extProperties) {
@@ -114,29 +124,31 @@ public class Configuration {
 
     /**
      * The store path will be gotten from the field of object.
-     *
+     *  为nameserver 的文件保存路径属性设置可以访问的状态？？
      * @throws java.lang.RuntimeException if the field of object is not exist.
      */
     public void setStorePathFromConfig(Object object, String fieldName) {
         assert object != null;
 
         try {
-            readWriteLock.writeLock().lockInterruptibly();
+            readWriteLock.writeLock().lockInterruptibly();//写锁
 
             try {
                 this.storePathFromConfig = true;
                 this.storePathObject = object;
                 // check
                 this.storePathField = object.getClass().getDeclaredField(fieldName);
+                //判断获取的保存文件路径是否为null,并且是否为静态的
                 assert this.storePathField != null
                     && !Modifier.isStatic(this.storePathField.getModifiers());
+                //文件路径属性设为可以访问的状态
                 this.storePathField.setAccessible(true);
             } catch (NoSuchFieldException e) {
                 throw new RuntimeException(e);
             } finally {
                 readWriteLock.writeLock().unlock();
             }
-        } catch (InterruptedException e) {
+        } catch (InterruptedException e) {//try catch 专为lock 锁设定
             log.error("setStorePathFromConfig lock error");
         }
     }
@@ -273,10 +285,11 @@ public class Configuration {
 
         return stringBuilder.toString();
     }
-
+    //合并配置项
     private void merge(Properties from, Properties to) {
         for (Object key : from.keySet()) {
             Object fromObj = from.get(key), toObj = to.get(key);
+            //如果to 有值 ，则打印一下，判断是先看是否为null,再判断是否和from 相等
             if (toObj != null && !toObj.equals(fromObj)) {
                 log.info("Replace, key: {}, value: {} -> {}", key, toObj, fromObj);
             }

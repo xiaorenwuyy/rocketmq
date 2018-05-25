@@ -28,20 +28,30 @@ import org.apache.rocketmq.common.protocol.body.KVTable;
 import org.apache.rocketmq.namesrv.NamesrvController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * key value 配置管理器
+ * @author yuyang
+ * @date 2018年5月25日
+ */
 public class KVConfigManager {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.NAMESRV_LOGGER_NAME);
 
     private final NamesrvController namesrvController;
 
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
+    //配置表
     private final HashMap<String/* Namespace */, HashMap<String/* Key */, String/* Value */>> configTable =
         new HashMap<String, HashMap<String, String>>();
 
     public KVConfigManager(NamesrvController namesrvController) {
         this.namesrvController = namesrvController;
     }
-
+    /**
+     * 把nameserver 配置类中获取的k-v 路径传入进来，把配置项放入也配置表中
+     *      
+     * @return void      
+     * @throws
+     */
     public void load() {
         String content = null;
         try {

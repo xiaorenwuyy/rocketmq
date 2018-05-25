@@ -22,7 +22,11 @@ import org.apache.rocketmq.namesrv.NamesrvController;
 import org.apache.rocketmq.remoting.ChannelEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * broker 保持信息服务
+ * @author yuyang
+ * @date 2018年5月25日
+ */
 public class BrokerHousekeepingService implements ChannelEventListener {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.NAMESRV_LOGGER_NAME);
     private final NamesrvController namesrvController;

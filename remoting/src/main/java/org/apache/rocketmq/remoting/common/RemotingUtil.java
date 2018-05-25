@@ -33,14 +33,20 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * 通信工具类
+ * @author yuyang
+ * @date 2018年5月25日
+ */
 public class RemotingUtil {
     public static final String OS_NAME = System.getProperty("os.name");
 
     private static final Logger log = LoggerFactory.getLogger(RemotingHelper.ROCKETMQ_REMOTING);
     private static boolean isLinuxPlatform = false;
     private static boolean isWindowsPlatform = false;
-
+    /**
+     * 判断当前是linux 或者是windows 
+     */
     static {
         if (OS_NAME != null && OS_NAME.toLowerCase().contains("linux")) {
             isLinuxPlatform = true;

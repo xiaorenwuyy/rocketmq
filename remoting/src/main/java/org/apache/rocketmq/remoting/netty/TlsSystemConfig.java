@@ -19,10 +19,16 @@ package org.apache.rocketmq.remoting.netty;
 
 import io.netty.handler.ssl.SslContext;
 import org.apache.rocketmq.remoting.common.TlsMode;
-
+/**
+ * tls 系统配置类 
+ * @author yuyang
+ * @date 2018年5月25日
+ */
 public class TlsSystemConfig {
+	//服务模式
     public static final String TLS_SERVER_MODE = "tls.server.mode";
     public static final String TLS_ENABLE = "tls.enable";
+    //tls 配置 文件
     public static final String TLS_CONFIG_FILE = "tls.config.file";
     public static final String TLS_TEST_MODE_ENABLE = "tls.test.mode.enable";
 

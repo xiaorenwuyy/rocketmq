@@ -37,46 +37,65 @@ import org.apache.rocketmq.srvutil.ServerUtil;
 import org.apache.rocketmq.srvutil.ShutdownHookThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * nameserver 启动类
+ * @author yuyang
+ * @date 2018年5月24日
+ */
 public class NamesrvStartup {
+	/**
+	 * 配置
+	 */
     public static Properties properties = null;
+    /**
+     * apache 线上命令行类
+     */
     public static CommandLine commandLine = null;
 
     public static void main(String[] args) {
+    	System.setProperty(MixAll.ROCKETMQ_HOME_PROPERTY, "F:\\workspace-rocketmq\\rocketmq-all-4.2.0\\distribution\\target\\apache-rocketmq");
         main0(args);
     }
 
     public static NamesrvController main0(String[] args) {
+    	/**
+    	 * 设置远程mq 的配置项
+    	 */
         System.setProperty(RemotingCommand.REMOTING_VERSION_KEY, Integer.toString(MQVersion.CURRENT_VERSION));
         try {
             //PackageConflictDetect.detectFastjson();
 
             Options options = ServerUtil.buildCommandlineOptions(new Options());
+            //解析命令行，用的是linux 的 解析参数及值解析器PosixParser
             commandLine = ServerUtil.parseCmdLine("mqnamesrv", args, buildCommandlineOptions(options), new PosixParser());
+            //判断如果  命令行没有解析成功，则结束
             if (null == commandLine) {
                 System.exit(-1);
                 return null;
             }
-
-            final NamesrvConfig namesrvConfig = new NamesrvConfig();
-            final NettyServerConfig nettyServerConfig = new NettyServerConfig();
+            
+            final NamesrvConfig namesrvConfig = new NamesrvConfig();//命名空间配置类
+            final NettyServerConfig nettyServerConfig = new NettyServerConfig();//netty 通信配置类
             nettyServerConfig.setListenPort(9876);
+            //判断命令行是否传入配置文件配置项
             if (commandLine.hasOption('c')) {
                 String file = commandLine.getOptionValue('c');
                 if (file != null) {
                     InputStream in = new BufferedInputStream(new FileInputStream(file));
                     properties = new Properties();
                     properties.load(in);
+                    //解析配置文件配置   简单的属性放入类中，长的属性直接用System.getProperty
                     MixAll.properties2Object(properties, namesrvConfig);
                     MixAll.properties2Object(properties, nettyServerConfig);
-
+                    
+                    //设置配置文件地址
                     namesrvConfig.setConfigStorePath(file);
 
                     System.out.printf("load config properties file OK, " + file + "%n");
                     in.close();
                 }
             }
-
+            //如果有打印的配置，则打印	nameserver 和netty 服务器配置
             if (commandLine.hasOption('p')) {
                 MixAll.printObjectProperties(null, namesrvConfig);
                 MixAll.printObjectProperties(null, nettyServerConfig);
@@ -84,7 +103,8 @@ public class NamesrvStartup {
             }
 
             MixAll.properties2Object(ServerUtil.commandLine2Properties(commandLine), namesrvConfig);
-
+            
+            //判断有没mq home 的属性值
             if (null == namesrvConfig.getRocketmqHome()) {
                 System.out.printf("Please set the %s variable in your environment to match the location of the RocketMQ installation%n", MixAll.ROCKETMQ_HOME_ENV);
                 System.exit(-2);
@@ -96,10 +116,11 @@ public class NamesrvStartup {
             lc.reset();
             configurator.doConfigure(namesrvConfig.getRocketmqHome() + "/conf/logback_namesrv.xml");
             final Logger log = LoggerFactory.getLogger(LoggerName.NAMESRV_LOGGER_NAME);
-
+            //打印日志
             MixAll.printObjectProperties(log, namesrvConfig);
             MixAll.printObjectProperties(log, nettyServerConfig);
-
+            
+            //nameserver controller 
             final NamesrvController controller = new NamesrvController(namesrvConfig, nettyServerConfig);
 
             // remember all configs to prevent discard
@@ -133,12 +154,18 @@ public class NamesrvStartup {
 
         return null;
     }
-
+    /**
+     * 在 原来属性项的基础上添加  有c 和 p 分别是配置文件和 打印配置项目
+     * @param  options     
+     * @return Options      
+     * @throws
+     */
     public static Options buildCommandlineOptions(final Options options) {
+    	//nameserver 配置文件
         Option opt = new Option("c", "configFile", true, "Name server config properties file");
         opt.setRequired(false);
         options.addOption(opt);
-
+        //打印所有的配置项
         opt = new Option("p", "printConfigItem", false, "Print all config item");
         opt.setRequired(false);
         options.addOption(opt);

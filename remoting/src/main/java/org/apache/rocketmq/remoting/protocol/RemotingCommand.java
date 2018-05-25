@@ -30,10 +30,17 @@ import org.apache.rocketmq.remoting.common.RemotingHelper;
 import org.apache.rocketmq.remoting.exception.RemotingCommandException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * 远程命令
+ * @author yuyang
+ * @date 2018年5月24日
+ */
 public class RemotingCommand {
     public static final String SERIALIZE_TYPE_PROPERTY = "rocketmq.serialize.type";
     public static final String SERIALIZE_TYPE_ENV = "ROCKETMQ_SERIALIZE_TYPE";
+    /**
+     * 远程mq 版本常量key
+     */
     public static final String REMOTING_VERSION_KEY = "rocketmq.remoting.version";
     private static final Logger log = LoggerFactory.getLogger(RemotingHelper.ROCKETMQ_REMOTING);
     private static final int RPC_TYPE = 0; // 0, REQUEST_COMMAND

@@ -36,7 +36,7 @@ public enum TlsMode {
     TlsMode(String name) {
         this.name = name;
     }
-
+    //根据传入的字符串返回对应的enum 枚举
     public static TlsMode parse(String mode) {
         for (TlsMode tlsMode : TlsMode.values()) {
             if (tlsMode.name.equals(mode)) {

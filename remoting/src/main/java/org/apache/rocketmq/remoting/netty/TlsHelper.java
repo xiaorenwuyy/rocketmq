@@ -58,7 +58,11 @@ import static org.apache.rocketmq.remoting.netty.TlsSystemConfig.tlsServerKeyPat
 import static org.apache.rocketmq.remoting.netty.TlsSystemConfig.tlsServerNeedClientAuth;
 import static org.apache.rocketmq.remoting.netty.TlsSystemConfig.tlsServerTrustCertPath;
 import static org.apache.rocketmq.remoting.netty.TlsSystemConfig.tlsTestModeEnable;
-
+/**
+ * 安全传输工具类
+ * @author yuyang
+ * @date 2018年5月26日
+ */
 public class TlsHelper {
 
     public interface DecryptionStrategy {
@@ -87,7 +91,8 @@ public class TlsHelper {
     public static void registerDecryptionStrategy(final DecryptionStrategy decryptionStrategy) {
         TlsHelper.decryptionStrategy = decryptionStrategy;
     }
-
+    
+    //构建sslContext
     public static SslContext buildSslContext(boolean forClient) throws IOException, CertificateException {
         File configFile = new File(TlsSystemConfig.tlsConfigFile);
         extractTlsConfigFromFile(configFile);
@@ -156,7 +161,12 @@ public class TlsHelper {
             }
         }
     }
-
+    /**
+     * 从文件中提取tls 配置
+     * @param configFile     
+     * @return void      
+     * @throws
+     */
     private static void extractTlsConfigFromFile(final File configFile) {
         if (!(configFile.exists() && configFile.isFile() && configFile.canRead())) {
             LOGGER.info("Tls config file doesn't exist, skip it");
@@ -173,12 +183,12 @@ public class TlsHelper {
         } finally {
             if (null != inputStream) {
                 try {
-                    inputStream.close();
+                    inputStream.close();//一定要关闭
                 } catch (IOException ignore) {
                 }
             }
         }
-
+        //其实就是配置文件合并到tls系统配置文件
         tlsTestModeEnable = Boolean.parseBoolean(properties.getProperty(TLS_TEST_MODE_ENABLE, String.valueOf(tlsTestModeEnable)));
         tlsServerNeedClientAuth = properties.getProperty(TLS_SERVER_NEED_CLIENT_AUTH, tlsServerNeedClientAuth);
         tlsServerKeyPath = properties.getProperty(TLS_SERVER_KEYPATH, tlsServerKeyPath);
@@ -193,7 +203,12 @@ public class TlsHelper {
         tlsClientAuthServer = Boolean.parseBoolean(properties.getProperty(TLS_CLIENT_AUTHSERVER, String.valueOf(tlsClientAuthServer)));
         tlsClientTrustCertPath = properties.getProperty(TLS_CLIENT_TRUSTCERTPATH, tlsClientTrustCertPath);
     }
-
+    /**
+     * 打印配置
+     *      
+     * @return void      
+     * @throws
+     */
     private static void logTheFinalUsedTlsConfig() {
         LOGGER.info("Log the final used tls related configuration");
         LOGGER.info("{} = {}", TLS_TEST_MODE_ENABLE, tlsTestModeEnable);

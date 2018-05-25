@@ -61,14 +61,22 @@ import org.apache.rocketmq.remoting.exception.RemotingTooMuchRequestException;
 import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * netty 远程通信服务器
+ * @author yuyang
+ * @date 2018年5月25日
+ */
 public class NettyRemotingServer extends NettyRemotingAbstract implements RemotingServer {
     private static final Logger log = LoggerFactory.getLogger(RemotingHelper.ROCKETMQ_REMOTING);
+    //netty 启动类
     private final ServerBootstrap serverBootstrap;
+    //事件执行选择器
     private final EventLoopGroup eventLoopGroupSelector;
+    //事件执行boss
     private final EventLoopGroup eventLoopGroupBoss;
     private final NettyServerConfig nettyServerConfig;
-
+    
+    //netty callback 执行线程
     private final ExecutorService publicExecutor;
     private final ChannelEventListener channelEventListener;
 
@@ -86,19 +94,26 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
     public NettyRemotingServer(final NettyServerConfig nettyServerConfig) {
         this(nettyServerConfig, null);
     }
-
+    /**
+     * 初始化 serverBootstrap  
+     * @param nettyServerConfig   netty 通信配置类
+     * @param channelEventListener   channel 监听器，刚传入的是broker 的信息服务
+     */
     public NettyRemotingServer(final NettyServerConfig nettyServerConfig,
         final ChannelEventListener channelEventListener) {
+    	
         super(nettyServerConfig.getServerOnewaySemaphoreValue(), nettyServerConfig.getServerAsyncSemaphoreValue());
         this.serverBootstrap = new ServerBootstrap();
         this.nettyServerConfig = nettyServerConfig;
         this.channelEventListener = channelEventListener;
 
         int publicThreadNums = nettyServerConfig.getServerCallbackExecutorThreads();
+        //netty 执行线程数	
         if (publicThreadNums <= 0) {
             publicThreadNums = 4;
         }
-
+        
+        //call back 执行线程
         this.publicExecutor = Executors.newFixedThreadPool(publicThreadNums, new ThreadFactory() {
             private AtomicInteger threadIndex = new AtomicInteger(0);
 
@@ -107,7 +122,8 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
                 return new Thread(r, "NettyServerPublicExecutor_" + this.threadIndex.incrementAndGet());
             }
         });
-
+        
+        //事件执行boss
         this.eventLoopGroupBoss = new NioEventLoopGroup(1, new ThreadFactory() {
             private AtomicInteger threadIndex = new AtomicInteger(0);
 
@@ -116,7 +132,8 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
                 return new Thread(r, String.format("NettyBoss_%d", this.threadIndex.incrementAndGet()));
             }
         });
-
+        
+        //根据epoll 判断需要哪种选择器
         if (useEpoll()) {
             this.eventLoopGroupSelector = new EpollEventLoopGroup(nettyServerConfig.getServerSelectorThreads(), new ThreadFactory() {
                 private AtomicInteger threadIndex = new AtomicInteger(0);
@@ -153,7 +170,13 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
             }
         }
     }
-
+    
+    /**
+     * 判断当前是linux epoll ，如果是返回true ，这个可以用epoll 做优化
+     * @return     
+     * @return boolean      
+     * @throws
+     */
     private boolean useEpoll() {
         return RemotingUtil.isLinuxPlatform()
             && nettyServerConfig.isUseEpollNativeSelector()

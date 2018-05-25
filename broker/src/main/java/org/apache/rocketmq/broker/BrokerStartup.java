@@ -18,11 +18,13 @@ package org.apache.rocketmq.broker;
 
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
+
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -53,7 +55,9 @@ public class BrokerStartup {
     public static Logger log;
 
     public static void main(String[] args) {
-        start(createBrokerController(args));
+    	System.setProperty(MixAll.ROCKETMQ_HOME_PROPERTY, "F:\\workspace-rocketmq\\rocketmq-all-4.2.0\\distribution\\target\\apache-rocketmq");
+    	System.setProperty("autoCreateTopicEnable", "true");
+    	start(createBrokerController(args));
     }
 
     public static BrokerController start(BrokerController controller) {

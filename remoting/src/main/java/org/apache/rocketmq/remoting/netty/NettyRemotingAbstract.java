@@ -49,7 +49,11 @@ import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 import org.apache.rocketmq.remoting.protocol.RemotingSysResponseCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * netty 通信
+ * @author yuyang
+ * @date 2018年5月25日
+ */
 public abstract class NettyRemotingAbstract {
 
     /**
@@ -59,11 +63,13 @@ public abstract class NettyRemotingAbstract {
 
     /**
      * Semaphore to limit maximum number of on-going one-way requests, which protects system memory footprint.
+     * 单项最大  信号量
      */
     protected final Semaphore semaphoreOneway;
 
     /**
      * Semaphore to limit maximum number of on-going asynchronous requests, which protects system memory footprint.
+     * 异步最大 信号量
      */
     protected final Semaphore semaphoreAsync;
 
@@ -92,12 +98,13 @@ public abstract class NettyRemotingAbstract {
 
     /**
      * SSL context via which to create {@link SslHandler}.
+     * https 的ssl
      */
     protected SslContext sslContext;
 
     /**
      * Constructor, specifying capacity of one-way and asynchronous semaphores.
-     *
+     *  单项和异步最大
      * @param permitsOneway Number of permits for one-way requests.
      * @param permitsAsync Number of permits for asynchronous requests.
      */

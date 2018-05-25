@@ -43,11 +43,16 @@ import org.apache.rocketmq.common.constant.LoggerName;
 import org.apache.rocketmq.common.help.FAQUrl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * 配置信息转化类和常量命名类
+ * @author yuyang
+ * @date 2018年5月24日
+ */
 public class MixAll {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.COMMON_LOGGER_NAME);
-
+    //mq 主地址
     public static final String ROCKETMQ_HOME_ENV = "ROCKETMQ_HOME";
+    //mq 主地址
     public static final String ROCKETMQ_HOME_PROPERTY = "rocketmq.home.dir";
     public static final String NAMESRV_ADDR_ENV = "NAMESRV_ADDR";
     public static final String NAMESRV_ADDR_PROPERTY = "rocketmq.namesrv.addr";
@@ -226,15 +231,29 @@ public class MixAll {
 
         return null;
     }
-
+    /**
+     * 打印配置的属性
+     * @param  logger  日志工具类
+     * @param  object  要打印的配置类   
+     * @return void      
+     * @throws
+     */
     public static void printObjectProperties(final Logger logger, final Object object) {
         printObjectProperties(logger, object, false);
     }
-
+    /**
+     * 打印配置项属性
+     * @param  logger  日志工具类
+     * @param  object  要打印的配置类
+     * @param  onlyImportantField     是否重要的属性的的选择  可以和注解搭配
+     * @return void      
+     * @throws
+     */
     public static void printObjectProperties(final Logger logger, final Object object,
         final boolean onlyImportantField) {
         Field[] fields = object.getClass().getDeclaredFields();
         for (Field field : fields) {
+        	//判断属性是否是静态的，不是静态的有打印的可能
             if (!Modifier.isStatic(field.getModifiers())) {
                 String name = field.getName();
                 if (!name.startsWith("this")) {
@@ -242,7 +261,7 @@ public class MixAll {
                     try {
                         field.setAccessible(true);
                         value = field.get(object);
-                        if (null == value) {
+                        if (null == value) {//value 如果为null 则重新赋值空 
                             value = "";
                         }
                     } catch (IllegalAccessException e) {
@@ -255,7 +274,7 @@ public class MixAll {
                             continue;
                         }
                     }
-
+                    //logger 不为null 才打印，为null 啥也不做	
                     if (logger != null) {
                         logger.info(name + "=" + value);
                     } else {
@@ -313,23 +332,31 @@ public class MixAll {
 
         return properties;
     }
-
+    /**
+     * 把配置文件的配置项信息传入配置类中
+     * @param  p  配置项信息
+     * @param  object 配置 类    
+     * @return void      
+     * @throws
+     */
     public static void properties2Object(final Properties p, final Object object) {
         Method[] methods = object.getClass().getMethods();
         for (Method method : methods) {
-            String mn = method.getName();
+            String mn = method.getName();//获取方法名
             if (mn.startsWith("set")) {
                 try {
                     String tmp = mn.substring(4);
                     String first = mn.substring(3, 4);
 
-                    String key = first.toLowerCase() + tmp;
-                    String property = p.getProperty(key);
+                    String key = first.toLowerCase() + tmp;//获取方法的属性名
+                    String property = p.getProperty(key);//获取对应的配置项的配置信息
                     if (property != null) {
+                    	//获取方法的参数类型
                         Class<?>[] pt = method.getParameterTypes();
                         if (pt != null && pt.length > 0) {
                             String cn = pt[0].getSimpleName();
                             Object arg = null;
+                            //根据参数类型转义获取实际类型的配置信息   其实可以省略的这个主意都是简单的类型
                             if (cn.equals("int") || cn.equals("Integer")) {
                                 arg = Integer.parseInt(property);
                             } else if (cn.equals("long") || cn.equals("Long")) {
@@ -345,10 +372,11 @@ public class MixAll {
                             } else {
                                 continue;
                             }
+                            //反射方法设置变量
                             method.invoke(object, arg);
                         }
                     }
-                } catch (Throwable ignored) {
+                } catch (Throwable ignored) {//报错 了不做处理
                 }
             }
         }

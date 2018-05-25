@@ -15,9 +15,15 @@
  * limitations under the License.
  */
 package org.apache.rocketmq.common;
-
+/**
+ * mq 版本类
+ * @author yuyang
+ * @date 2018年5月24日
+ */
 public class MQVersion {
-
+	/**
+	 * 当前mq 版本 ，用的是v-4.2.0  的顺序
+	 */
     public static final int CURRENT_VERSION = Version.V4_2_0_SNAPSHOT.ordinal();
 
     public static String getVersionDesc(int value) {
