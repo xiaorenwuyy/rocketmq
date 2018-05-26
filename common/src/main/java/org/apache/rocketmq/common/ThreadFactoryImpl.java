@@ -19,7 +19,11 @@ package org.apache.rocketmq.common;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;
-
+/** 
+ * 线程工厂，可以写线程名前缀，newThread 方法，runnable  thread 构造方法，可以放入runnable和一个名字
+ * @author yuyang
+ * @date 2018年5月26日
+ */
 public class ThreadFactoryImpl implements ThreadFactory {
     private final AtomicLong threadIndex = new AtomicLong(0);
     private final String threadNamePrefix;

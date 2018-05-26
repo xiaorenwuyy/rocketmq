@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Base class for background thread
+ * 后台执行线程父类
  */
 public abstract class ServiceThread implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(RemotingHelper.ROCKETMQ_REMOTING);

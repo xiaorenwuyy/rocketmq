@@ -49,6 +49,8 @@ public class NamesrvController {
     private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryImpl(
         "NSScheduledThread"));
     private final KVConfigManager kvConfigManager;
+    
+    //路由器信息管理器
     private final RouteInfoManager routeInfoManager;
 
     private RemotingServer remotingServer;
@@ -63,7 +65,7 @@ public class NamesrvController {
         this.namesrvConfig = namesrvConfig;
         this.nettyServerConfig = nettyServerConfig;
         this.kvConfigManager = new KVConfigManager(this);
-        this.routeInfoManager = new RouteInfoManager();
+        this.routeInfoManager = new RouteInfoManager();//路由信息管理器
         this.brokerHousekeepingService = new BrokerHousekeepingService(this);//放入nameserver controller 的引用备后用
         this.configuration = new Configuration(
             log,
@@ -79,14 +81,17 @@ public class NamesrvController {
     public boolean initialize() {
     	//key value 配置管理器 把配置项放入也配置表中
         this.kvConfigManager.load();
-
+        //netty 通信服务器
         this.remotingServer = new NettyRemotingServer(this.nettyServerConfig, this.brokerHousekeepingService);
-
+        
+        //netty 执行线程  netty 处理请求时用
         this.remotingExecutor =
             Executors.newFixedThreadPool(nettyServerConfig.getServerWorkerThreads(), new ThreadFactoryImpl("RemotingExecutorThread_"));
-
+        
+        //注册请求处理器
         this.registerProcessor();
 
+        //扫描过期的broker,如果查到就销毁  10秒钟扫描一次
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override
@@ -94,7 +99,8 @@ public class NamesrvController {
                 NamesrvController.this.routeInfoManager.scanNotActiveBroker();
             }
         }, 5, 10, TimeUnit.SECONDS);
-
+        
+        //打印nameserver 所有的配置  10分钟扫描一次
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override
@@ -105,14 +111,20 @@ public class NamesrvController {
 
         return true;
     }
-
+    
+    /**
+     * 注册执行处理器  用netty 通信服务器注册
+     *      
+     * @return void      
+     * @throws
+     */
     private void registerProcessor() {
         if (namesrvConfig.isClusterTest()) {
 
             this.remotingServer.registerDefaultProcessor(new ClusterTestRequestProcessor(this, namesrvConfig.getProductEnvName()),
                 this.remotingExecutor);
         } else {
-
+        	//netty 服务器注册请求处理器，用的是默认的请求处理器	
             this.remotingServer.registerDefaultProcessor(new DefaultRequestProcessor(this), this.remotingExecutor);
         }
     }
@@ -120,7 +132,13 @@ public class NamesrvController {
     public void start() throws Exception {
         this.remotingServer.start();
     }
-
+    
+    /**
+     * 异常或者是正常controller 关闭
+     *      
+     * @return void      
+     * @throws
+     */
     public void shutdown() {
         this.remotingServer.shutdown();
         this.remotingExecutor.shutdown();

@@ -17,10 +17,17 @@
 package org.apache.rocketmq.remoting.netty;
 
 import io.netty.channel.Channel;
-
+/**
+ * rocketmp 封装的netty 事件
+ * @author yuyang
+ * @date 2018年5月26日
+ */
 public class NettyEvent {
+	//netty 事件类型
     private final NettyEventType type;
+    //远程地址
     private final String remoteAddr;
+    //渠道，netty 的类
     private final Channel channel;
 
     public NettyEvent(NettyEventType type, String remoteAddr, Channel channel) {

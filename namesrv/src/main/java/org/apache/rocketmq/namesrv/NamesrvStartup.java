@@ -125,7 +125,8 @@ public class NamesrvStartup {
 
             // remember all configs to prevent discard
             controller.getConfiguration().registerConfig(properties);
-
+            
+            //controller 初始化
             boolean initResult = controller.initialize();
             if (!initResult) {
                 controller.shutdown();

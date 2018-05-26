@@ -192,10 +192,17 @@ public class RemotingUtil {
 
         return null;
     }
-
+    /**
+     * 关闭channel 渠道   直接调用渠道的close 方法，并且加了一个监听器打印日志是否有没关闭成功
+     * @param channel   需要关闭的渠道  
+     * @return void      
+     * @throws
+     */
     public static void closeChannel(Channel channel) {
         final String addrRemote = RemotingHelper.parseChannelRemoteAddr(channel);
+        //channel 关闭 调用监听器 ，先close 在添加监听器
         channel.close().addListener(new ChannelFutureListener() {
+        	//覆盖方法执行，只是打印日志  判断是否已经关闭成功，是不是有问题？也可以直接调用 ChannelFutureListener 的其他的已经建好的listener
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
                 log.info("closeChannel: close the connection to remote address[{}] result: {}", addrRemote,

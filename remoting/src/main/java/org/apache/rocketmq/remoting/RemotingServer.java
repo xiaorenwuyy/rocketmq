@@ -24,12 +24,22 @@ import org.apache.rocketmq.remoting.exception.RemotingTimeoutException;
 import org.apache.rocketmq.remoting.exception.RemotingTooMuchRequestException;
 import org.apache.rocketmq.remoting.netty.NettyRequestProcessor;
 import org.apache.rocketmq.remoting.protocol.RemotingCommand;
-
+/**
+ * 远程通信服务器接口
+ * @author yuyang
+ * @date 2018年5月26日
+ */
 public interface RemotingServer extends RemotingService {
 
     void registerProcessor(final int requestCode, final NettyRequestProcessor processor,
         final ExecutorService executor);
-
+    /**
+     * netty 通信服务器注册请求处理器
+     * @param processor  netty 请求处理器
+     * @param executor   netty 处理线程  
+     * @return void      
+     * @throws
+     */
     void registerDefaultProcessor(final NettyRequestProcessor processor, final ExecutorService executor);
 
     int localListenPort();

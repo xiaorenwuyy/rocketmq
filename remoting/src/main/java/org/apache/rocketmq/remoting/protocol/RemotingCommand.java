@@ -61,6 +61,7 @@ public class RemotingCommand {
     private static final String BOOLEAN_CANONICAL_NAME_1 = Boolean.class.getCanonicalName();
     private static final String BOOLEAN_CANONICAL_NAME_2 = boolean.class.getCanonicalName();
     private static volatile int configVersion = -1;
+    //请求识别
     private static AtomicInteger requestId = new AtomicInteger(0);
 
     private static SerializeType serializeTypeConfigInThisServer = SerializeType.JSON;
@@ -75,10 +76,12 @@ public class RemotingCommand {
             }
         }
     }
-
+    
+    //命令编码
     private int code;
     private LanguageCode language = LanguageCode.JAVA;
     private int version = 0;
+    //请求识别编码
     private int opaque = requestId.getAndIncrement();
     private int flag = 0;
     private String remark;

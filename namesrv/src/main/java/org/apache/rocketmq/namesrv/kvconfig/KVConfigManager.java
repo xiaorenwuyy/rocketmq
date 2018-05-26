@@ -179,7 +179,13 @@ public class KVConfigManager {
 
         return null;
     }
-
+    
+    /**
+     * 打印nameserver 所有的配置
+     *      
+     * @return void      
+     * @throws
+     */
     public void printAllPeriodically() {
         try {
             this.lock.readLock().lockInterruptibly();

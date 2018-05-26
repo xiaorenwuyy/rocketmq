@@ -50,7 +50,7 @@ import org.apache.rocketmq.remoting.protocol.RemotingSysResponseCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
- * netty 通信
+ * netty 通信 抽象类
  * @author yuyang
  * @date 2018年5月25日
  */
@@ -82,17 +82,20 @@ public abstract class NettyRemotingAbstract {
     /**
      * This container holds all processors per request code, aka, for each incoming request, we may look up the
      * responding processor in this map to handle the request.
+     * 远程命令编码存储表
      */
     protected final HashMap<Integer/* request code */, Pair<NettyRequestProcessor, ExecutorService>> processorTable =
         new HashMap<Integer, Pair<NettyRequestProcessor, ExecutorService>>(64);
 
     /**
      * Executor to feed netty events to user defined {@link ChannelEventListener}.
+     * netty 事件执行器
      */
     protected final NettyEventExecutor nettyEventExecutor = new NettyEventExecutor();
 
     /**
      * The default request processor to use in case there is no exact match in {@link #processorTable} per request code.
+     * 默认的netty 请求处理器 封装的是，请求处理器和执行线程
      */
     protected Pair<NettyRequestProcessor, ExecutorService> defaultRequestProcessor;
 
@@ -122,7 +125,7 @@ public abstract class NettyRemotingAbstract {
 
     /**
      * Put a netty event to the executor.
-     *
+     * 发送一个netty 的时间到执行器
      * @param event Netty event instance.
      */
     public void putNettyEvent(final NettyEvent event) {
@@ -131,7 +134,7 @@ public abstract class NettyRemotingAbstract {
 
     /**
      * Entry of incoming command processing.
-     *
+     * 命令行处理
      * <p>
      * <strong>Note:</strong>
      * The incoming remoting command may be
@@ -149,7 +152,7 @@ public abstract class NettyRemotingAbstract {
         final RemotingCommand cmd = msg;
         if (cmd != null) {
             switch (cmd.getType()) {
-                case REQUEST_COMMAND:
+                case REQUEST_COMMAND://处理请求
                     processRequestCommand(ctx, cmd);
                     break;
                 case RESPONSE_COMMAND:
@@ -163,7 +166,7 @@ public abstract class NettyRemotingAbstract {
 
     /**
      * Process incoming request command issued by remote peer.
-     *
+     * 处理请求
      * @param ctx channel handler context.
      * @param cmd request command.
      */
@@ -177,6 +180,7 @@ public abstract class NettyRemotingAbstract {
                 @Override
                 public void run() {
                     try {
+                    	//分类调用子类的方法   这样不太好 todo
                         RPCHook rpcHook = NettyRemotingAbstract.this.getRPCHook();
                         if (rpcHook != null) {
                             rpcHook.doBeforeRequest(RemotingHelper.parseChannelRemoteAddr(ctx.channel()), cmd);
@@ -494,11 +498,22 @@ public abstract class NettyRemotingAbstract {
             }
         }
     }
-
+    
+    /**
+     * 默认的netty 事件执行器
+     * @author yuyang
+     * @date 2018年5月26日
+     */
     class NettyEventExecutor extends ServiceThread {
         private final LinkedBlockingQueue<NettyEvent> eventQueue = new LinkedBlockingQueue<NettyEvent>();
         private final int maxSize = 10000;
-
+        
+        /**
+         * 把事件添加到事件队列中
+         * @param event   需要添加的netty 事件 
+         * @return void      
+         * @throws
+         */
         public void putNettyEvent(final NettyEvent event) {
             if (this.eventQueue.size() <= maxSize) {
                 this.eventQueue.add(event);

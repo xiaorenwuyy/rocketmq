@@ -44,17 +44,28 @@ import org.apache.rocketmq.common.sysflag.TopicSysFlag;
 import org.apache.rocketmq.remoting.common.RemotingUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * 路由器信息管理
+ * @author yuyang
+ * @date 2018年5月26日
+ */
 public class RouteInfoManager {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.NAMESRV_LOGGER_NAME);
+    //broker 渠道失效时间
     private final static long BROKER_CHANNEL_EXPIRED_TIME = 1000 * 60 * 2;
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
+    //topic 主题表
     private final HashMap<String/* topic */, List<QueueData>> topicQueueTable;
+    //broker 地址表
     private final HashMap<String/* brokerName */, BrokerData> brokerAddrTable;
     private final HashMap<String/* clusterName */, Set<String/* brokerName */>> clusterAddrTable;
+    //broker 现在活动的信息表 构建是空间是256  key 放的是broker 地址
     private final HashMap<String/* brokerAddr */, BrokerLiveInfo> brokerLiveTable;
+    //key 放的是borker 地址
     private final HashMap<String/* brokerAddr */, List<String>/* Filter Server */> filterServerTable;
-
+    /**
+     * 构建为5个表赋默认值
+     */
     public RouteInfoManager() {
         this.topicQueueTable = new HashMap<String, List<QueueData>>(1024);
         this.brokerAddrTable = new HashMap<String, BrokerData>(128);
@@ -405,26 +416,41 @@ public class RouteInfoManager {
 
         return null;
     }
-
+    /**
+     * 扫描不活动的broker,如果有发现已经过期失效，就关闭channel 会有监听打印关闭结果，并且删除broker存活表中的数据
+     *      
+     * @return void      
+     * @throws
+     */
     public void scanNotActiveBroker() {
         Iterator<Entry<String, BrokerLiveInfo>> it = this.brokerLiveTable.entrySet().iterator();
         while (it.hasNext()) {
             Entry<String, BrokerLiveInfo> next = it.next();
             long last = next.getValue().getLastUpdateTimestamp();
+            //如果失效就关闭 并且删除 存活表中的这条数据   
+            //是否失效计算方式是用最后一次更新时间加上失效时间与当前时间做比较，  如果比当前时间小就是已经失效了，相等或大了不做处理
             if ((last + BROKER_CHANNEL_EXPIRED_TIME) < System.currentTimeMillis()) {
-                RemotingUtil.closeChannel(next.getValue().getChannel());
-                it.remove();
+                //关闭channel 
+            	RemotingUtil.closeChannel(next.getValue().getChannel());
+                //删除 broker 存活表中的这条数据
+            	it.remove();
                 log.warn("The broker channel expired, {} {}ms", next.getKey(), BROKER_CHANNEL_EXPIRED_TIME);
                 this.onChannelDestroy(next.getKey(), next.getValue().getChannel());
             }
         }
     }
-
+    /**
+     * channel 销毁
+     * @param remoteAddr  broker存活表中的key值，放的是broker 的地址    
+     * @param channel     broker 存活表中value 值中存放的channel 渠道，上一步已经关闭了
+     * @return void      
+     * @throws
+     */
     public void onChannelDestroy(String remoteAddr, Channel channel) {
         String brokerAddrFound = null;
         if (channel != null) {
             try {
-                try {
+                try {//lock 的 try catch 
                     this.lock.readLock().lockInterruptibly();
                     Iterator<Entry<String, BrokerLiveInfo>> itBrokerLiveTable =
                         this.brokerLiveTable.entrySet().iterator();
@@ -442,21 +468,24 @@ public class RouteInfoManager {
                 log.error("onChannelDestroy Exception", e);
             }
         }
-
+        
+        //获取broker地址
         if (null == brokerAddrFound) {
             brokerAddrFound = remoteAddr;
         } else {
             log.info("the broker's channel destroyed, {}, clean it's data structure at once", brokerAddrFound);
         }
-
+        
         if (brokerAddrFound != null && brokerAddrFound.length() > 0) {
 
             try {
                 try {
                     this.lock.writeLock().lockInterruptibly();
+                    //1,brokerlive 表和fillter 直接删除地址
                     this.brokerLiveTable.remove(brokerAddrFound);
                     this.filterServerTable.remove(brokerAddrFound);
                     String brokerNameFound = null;
+                    //从broker地址信息表中的broker 封装数据类地址map中删除 地址
                     boolean removeBrokerName = false;
                     Iterator<Entry<String, BrokerData>> itBrokerAddrTable =
                         this.brokerAddrTable.entrySet().iterator();
@@ -469,14 +498,16 @@ public class RouteInfoManager {
                             Long brokerId = entry.getKey();
                             String brokerAddr = entry.getValue();
                             if (brokerAddr.equals(brokerAddrFound)) {
+                            	//获取 brokerName 退出大循环也就是说地址信息表中也就只存一处此地址信息
                                 brokerNameFound = brokerData.getBrokerName();
+                                //2.1broker 地址表中 封装数据类中map 删除					
                                 it.remove();
                                 log.info("remove brokerAddr[{}, {}] from brokerAddrTable, because channel destroyed",
                                     brokerId, brokerAddr);
                                 break;
                             }
                         }
-
+                        //2.2判断broker 地址表 中如果此borker 封装数据类的地址map 为空，则在broker 地址信息表中 删除此broker 封装数据类
                         if (brokerData.getBrokerAddrs().isEmpty()) {
                             removeBrokerName = true;
                             itBrokerAddrTable.remove();
@@ -484,13 +515,16 @@ public class RouteInfoManager {
                                 brokerData.getBrokerName());
                         }
                     }
-
+                    
+                    //3,1broker地址表中 broker 数据封装类 删除后也要在broker 集群表中删除此brokername
+                    //先
                     if (brokerNameFound != null && removeBrokerName) {
                         Iterator<Entry<String, Set<String>>> it = this.clusterAddrTable.entrySet().iterator();
                         while (it.hasNext()) {
                             Entry<String, Set<String>> entry = it.next();
                             String clusterName = entry.getKey();
                             Set<String> brokerNames = entry.getValue();
+                            //3.2取出所有的value 进行删除,地址表value 放的是地址所以没有这么删除
                             boolean removed = brokerNames.remove(brokerNameFound);
                             if (removed) {
                                 log.info("remove brokerName[{}], clusterName[{}] from clusterAddrTable, because channel destroyed",
@@ -501,12 +535,13 @@ public class RouteInfoManager {
                                         clusterName);
                                     it.remove();
                                 }
-
+                                //应该是集群中只有一处有此值，所以找到后删除，退出循环
                                 break;
                             }
                         }
                     }
-
+                    
+                    //broker地址表中 broker 数据封装类 删除后 删除对应的borker name ,删除模式如同删除 地址信息表的模式，只不过地址信息表map 又用broker 封装数据类封装了一下
                     if (removeBrokerName) {
                         Iterator<Entry<String, List<QueueData>>> itTopicQueueTable =
                             this.topicQueueTable.entrySet().iterator();
@@ -731,10 +766,16 @@ public class RouteInfoManager {
         return topicList.encode();
     }
 }
-
+/**
+ * 内部类 borker活动信息
+ * @author yuyang
+ * @date 2018年5月26日
+ */
 class BrokerLiveInfo {
+	//上次活动时间  用的时间戳
     private long lastUpdateTimestamp;
     private DataVersion dataVersion;
+    //渠道信息 netty 的类
     private Channel channel;
     private String haServerAddr;
 

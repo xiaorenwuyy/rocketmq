@@ -15,10 +15,14 @@
  * limitations under the License.
  */
 package org.apache.rocketmq.remoting.netty;
-
+/**
+ * netty 事件枚举
+ * @author yuyang
+ * @date 2018年5月26日
+ */
 public enum NettyEventType {
-    CONNECT,
-    CLOSE,
-    IDLE,
-    EXCEPTION
+    CONNECT,//连接
+    CLOSE,//关闭
+    IDLE,//空转
+    EXCEPTION//异常
 }

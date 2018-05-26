@@ -16,6 +16,11 @@
  */
 package org.apache.rocketmq.remoting.protocol;
 
+/**
+ * 远程命令类型 有请求和响应两种
+ * @author yuyang
+ * @date 2018年5月26日
+ */
 public enum RemotingCommandType {
     REQUEST_COMMAND,
     RESPONSE_COMMAND;

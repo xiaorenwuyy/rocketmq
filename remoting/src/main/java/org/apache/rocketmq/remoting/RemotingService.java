@@ -16,7 +16,11 @@
  */
 
 package org.apache.rocketmq.remoting;
-
+/**
+ * 远程通信服务高级接口
+ * @author yuyang
+ * @date 2018年5月26日
+ */
 public interface RemotingService {
     void start();
 

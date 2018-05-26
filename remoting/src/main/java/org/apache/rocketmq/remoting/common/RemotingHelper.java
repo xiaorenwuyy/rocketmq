@@ -149,7 +149,13 @@ public class RemotingHelper {
             throw new RemotingConnectException(addr);
         }
     }
-
+    /**
+     * 解析channel 到字符串地址，只是打印而已
+     * @param channel  需要解析的channel
+     * @return     
+     * @return String    解析的地址  
+     * @throws
+     */
     public static String parseChannelRemoteAddr(final Channel channel) {
         if (null == channel) {
             return "";
@@ -159,6 +165,7 @@ public class RemotingHelper {
 
         if (addr.length() > 0) {
             int index = addr.lastIndexOf("/");
+            //截取 "/"后面的地址
             if (index >= 0) {
                 return addr.substring(index + 1);
             }

@@ -16,7 +16,11 @@
  */
 
 package org.apache.rocketmq.common.protocol;
-
+/**
+ * 请求的编码类
+ * @author yuyang
+ * @date 2018年5月26日
+ */
 public class RequestCode {
 
     public static final int SEND_MESSAGE = 10;
