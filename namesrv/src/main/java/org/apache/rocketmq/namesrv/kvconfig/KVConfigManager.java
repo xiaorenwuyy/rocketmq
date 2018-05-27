@@ -141,7 +141,14 @@ public class KVConfigManager {
 
         this.persist();
     }
-
+    
+    /**
+     * 从allconfig 表中获取
+     * @param namespace   allconfig key 值
+     * @return     
+     * @return byte[]      
+     * @throws
+     */
     public byte[] getKVListByNamespace(final String namespace) {
         try {
             this.lock.readLock().lockInterruptibly();

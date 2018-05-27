@@ -28,7 +28,9 @@ import org.apache.rocketmq.common.MixAll;
  * @date 2018年5月26日
  */
 public class BrokerData implements Comparable<BrokerData> {
+	//集群名称
     private String cluster;
+    //broker 名称
     private String brokerName;
     //broker 地址列表 
     private HashMap<Long/* brokerId */, String/* broker address */> brokerAddrs;
@@ -38,7 +40,7 @@ public class BrokerData implements Comparable<BrokerData> {
     public BrokerData() {
 
     }
-
+    
     public BrokerData(String cluster, String brokerName, HashMap<Long, String> brokerAddrs) {
         this.cluster = cluster;
         this.brokerName = brokerName;

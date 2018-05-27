@@ -23,7 +23,11 @@ package org.apache.rocketmq.common.protocol.header.namesrv;
 import org.apache.rocketmq.remoting.CommandCustomHeader;
 import org.apache.rocketmq.remoting.annotation.CFNotNull;
 import org.apache.rocketmq.remoting.exception.RemotingCommandException;
-
+/**
+ * broker 注册请求头
+ * @author yuyang
+ * @date 2018年5月27日
+ */
 public class RegisterBrokerRequestHeader implements CommandCustomHeader {
     @CFNotNull
     private String brokerName;
@@ -31,6 +35,7 @@ public class RegisterBrokerRequestHeader implements CommandCustomHeader {
     private String brokerAddr;
     @CFNotNull
     private String clusterName;
+    //server 地址
     @CFNotNull
     private String haServerAddr;
     @CFNotNull

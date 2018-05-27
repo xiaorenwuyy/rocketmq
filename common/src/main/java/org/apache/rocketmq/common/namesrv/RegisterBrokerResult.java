@@ -18,10 +18,17 @@
 package org.apache.rocketmq.common.namesrv;
 
 import org.apache.rocketmq.common.protocol.body.KVTable;
-
+/**
+ * broker 注册结果
+ * @author yuyang
+ * @date 2018年5月27日
+ */
 public class RegisterBrokerResult {
+	//server 地址
     private String haServerAddr;
+    //master 地址
     private String masterAddr;
+    //封装的map 表
     private KVTable kvTable;
 
     public String getHaServerAddr() {

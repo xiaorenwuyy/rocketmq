@@ -18,7 +18,11 @@ package org.apache.rocketmq.remoting.common;
 
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
-
+/**
+ * 只释放一次限流类
+ * @author yuyang
+ * @date 2018年5月27日
+ */
 public class SemaphoreReleaseOnlyOnce {
     private final AtomicBoolean released = new AtomicBoolean(false);
     private final Semaphore semaphore;
@@ -26,7 +30,7 @@ public class SemaphoreReleaseOnlyOnce {
     public SemaphoreReleaseOnlyOnce(Semaphore semaphore) {
         this.semaphore = semaphore;
     }
-
+    //限流值释放一次
     public void release() {
         if (this.semaphore != null) {
             if (this.released.compareAndSet(false, true)) {

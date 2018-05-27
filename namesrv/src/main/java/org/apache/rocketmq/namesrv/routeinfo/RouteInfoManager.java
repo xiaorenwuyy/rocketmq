@@ -109,7 +109,20 @@ public class RouteInfoManager {
 
         return topicList.encode();
     }
-
+    /**
+     * 注册broker 
+     * @param clusterName  集群名称
+     * @param brokerAddr  broker地址
+     * @param brokerName  broker 名称
+     * @param brokerId   broker id
+     * @param haServerAddr  server 地址
+     * @param topicConfigWrapper  topic 配置表
+     * @param filterServerList  过滤server 列表
+     * @param channel
+     * @return     
+     * @return RegisterBrokerResult      
+     * @throws
+     */
     public RegisterBrokerResult registerBroker(
         final String clusterName,
         final String brokerAddr,
@@ -123,14 +136,16 @@ public class RouteInfoManager {
         try {
             try {
                 this.lock.writeLock().lockInterruptibly();
-
+                
+                //1，设置broker集群地址表
                 Set<String> brokerNames = this.clusterAddrTable.get(clusterName);
                 if (null == brokerNames) {
                     brokerNames = new HashSet<String>();
                     this.clusterAddrTable.put(clusterName, brokerNames);
                 }
                 brokerNames.add(brokerName);
-
+                
+                //2,设置broker 地址表
                 boolean registerFirst = false;
 
                 BrokerData brokerData = this.brokerAddrTable.get(brokerName);
@@ -141,9 +156,13 @@ public class RouteInfoManager {
                 }
                 String oldAddr = brokerData.getBrokerAddrs().put(brokerId, brokerAddr);
                 registerFirst = registerFirst || (null == oldAddr);
-
+                
+                //第一次注册
+                //3，topic 配置表添加修改
                 if (null != topicConfigWrapper
                     && MixAll.MASTER_ID == brokerId) {
+                	//查看此broker topic 配置是否发生变化
+                	//如果是第一次或者发生变化则去做处理
                     if (this.isBrokerTopicConfigChanged(brokerAddr, topicConfigWrapper.getDataVersion())
                         || registerFirst) {
                         ConcurrentMap<String, TopicConfig> tcTable =
@@ -156,6 +175,7 @@ public class RouteInfoManager {
                     }
                 }
 
+                //4，broker 存活表添加
                 BrokerLiveInfo prevBrokerLiveInfo = this.brokerLiveTable.put(brokerAddr,
                     new BrokerLiveInfo(
                         System.currentTimeMillis(),
@@ -165,7 +185,8 @@ public class RouteInfoManager {
                 if (null == prevBrokerLiveInfo) {
                     log.info("new broker registered, {} HAServer: {}", brokerAddr, haServerAddr);
                 }
-
+                
+                //5,filter server 过滤服务器列表设置
                 if (filterServerList != null) {
                     if (filterServerList.isEmpty()) {
                         this.filterServerTable.remove(brokerAddr);
@@ -173,7 +194,8 @@ public class RouteInfoManager {
                         this.filterServerTable.put(brokerAddr, filterServerList);
                     }
                 }
-
+                
+                //6，获取主节点地址和主server 地址
                 if (MixAll.MASTER_ID != brokerId) {
                     String masterAddr = brokerData.getBrokerAddrs().get(MixAll.MASTER_ID);
                     if (masterAddr != null) {
@@ -193,7 +215,14 @@ public class RouteInfoManager {
 
         return result;
     }
-
+    /**
+     * 查看此broker topic 配置变化情况
+     * @param brokerAddr  broker 地址
+     * @param dataVersion  数据版本
+     * @return     
+     * @return boolean      
+     * @throws
+     */
     private boolean isBrokerTopicConfigChanged(final String brokerAddr, final DataVersion dataVersion) {
         BrokerLiveInfo prev = this.brokerLiveTable.get(brokerAddr);
         if (null == prev || !prev.getDataVersion().equals(dataVersion)) {
@@ -202,9 +231,16 @@ public class RouteInfoManager {
 
         return false;
     }
-
+    /**
+     * 创建或者更新topic 队列数据,如果是更新是先删掉，在新增
+     * @param brokerName
+     * @param topicConfig     
+     * @return void      
+     * @throws
+     */
     private void createAndUpdateQueueData(final String brokerName, final TopicConfig topicConfig) {
-        QueueData queueData = new QueueData();
+        //创建队列
+    	QueueData queueData = new QueueData();
         queueData.setBrokerName(brokerName);
         queueData.setWriteQueueNums(topicConfig.getWriteQueueNums());
         queueData.setReadQueueNums(topicConfig.getReadQueueNums());
@@ -233,7 +269,7 @@ public class RouteInfoManager {
                     }
                 }
             }
-
+            //如果队列没有这个就新增，之前会做逻辑判断
             if (addNewOne) {
                 queueDataList.add(queueData);
             }
@@ -541,7 +577,8 @@ public class RouteInfoManager {
                         }
                     }
                     
-                    //broker地址表中 broker 数据封装类 删除后 删除对应的borker name ,删除模式如同删除 地址信息表的模式，只不过地址信息表map 又用broker 封装数据类封装了一下
+                    //4，broker地址表中 broker 数据封装类 删除后 删除对应的borker name ,删除模式如同删除 地址信息表的模式，只不过地址信息表map 又用broker 封装数据类封装了一下
+                    //4 topic 删除，如同集群删除
                     if (removeBrokerName) {
                         Iterator<Entry<String, List<QueueData>>> itTopicQueueTable =
                             this.topicQueueTable.entrySet().iterator();

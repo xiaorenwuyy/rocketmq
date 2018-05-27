@@ -20,9 +20,14 @@ package org.apache.rocketmq.common.protocol.body;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.rocketmq.remoting.protocol.RemotingSerializable;
-
+/**
+ * broker 注册body
+ * @author yuyang
+ * @date 2018年5月27日
+ */
 public class RegisterBrokerBody extends RemotingSerializable {
-    private TopicConfigSerializeWrapper topicConfigSerializeWrapper = new TopicConfigSerializeWrapper();
+    //topic 配置封装类
+	private TopicConfigSerializeWrapper topicConfigSerializeWrapper = new TopicConfigSerializeWrapper();
     private List<String> filterServerList = new ArrayList<String>();
 
     public TopicConfigSerializeWrapper getTopicConfigSerializeWrapper() {

@@ -20,7 +20,11 @@ package org.apache.rocketmq.common.protocol.header.namesrv;
 import org.apache.rocketmq.remoting.CommandCustomHeader;
 import org.apache.rocketmq.remoting.annotation.CFNullable;
 import org.apache.rocketmq.remoting.exception.RemotingCommandException;
-
+/**
+ * broker 注册响应头
+ * @author yuyang
+ * @date 2018年5月27日
+ */
 public class RegisterBrokerResponseHeader implements CommandCustomHeader {
     @CFNullable
     private String haServerAddr;

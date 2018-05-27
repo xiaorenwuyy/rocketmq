@@ -18,7 +18,11 @@ package org.apache.rocketmq.common.protocol.body;
 
 import java.util.HashMap;
 import org.apache.rocketmq.remoting.protocol.RemotingSerializable;
-
+/**
+ * 封装kv table 类
+ * @author yuyang
+ * @date 2018年5月27日
+ */
 public class KVTable extends RemotingSerializable {
     private HashMap<String, String> table = new HashMap<String, String>();
 

@@ -40,6 +40,7 @@ public class NettyServerConfig implements Cloneable {
     private int serverSocketSndBufSize = NettySystemConfig.socketSndbufSize;
     //接收 netty 缓存大小
     private int serverSocketRcvBufSize = NettySystemConfig.socketRcvbufSize;
+    //分配server 池可行性
     private boolean serverPooledByteBufAllocatorEnable = true;
 
     /**

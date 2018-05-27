@@ -45,11 +45,15 @@ public class RemotingCommand {
     private static final Logger log = LoggerFactory.getLogger(RemotingHelper.ROCKETMQ_REMOTING);
     private static final int RPC_TYPE = 0; // 0, REQUEST_COMMAND
     private static final int RPC_ONEWAY = 1; // 0, RPC
+    //存放请求头响应的表
     private static final Map<Class<? extends CommandCustomHeader>, Field[]> CLASS_HASH_MAP =
         new HashMap<Class<? extends CommandCustomHeader>, Field[]>();
+    //存放数据类型    主要是header 的field class 等信息
     private static final Map<Class, String> CANONICAL_NAME_CACHE = new HashMap<Class, String>();
     // 1, Oneway
     // 1, RESPONSE_COMMAND
+    
+    //属性是否 可以为null 列表
     private static final Map<Field, Boolean> NULLABLE_FIELD_CACHE = new HashMap<Field, Boolean>();
     private static final String STRING_CANONICAL_NAME = String.class.getCanonicalName();
     private static final String DOUBLE_CANONICAL_NAME_1 = Double.class.getCanonicalName();
@@ -80,12 +84,18 @@ public class RemotingCommand {
     //命令编码
     private int code;
     private LanguageCode language = LanguageCode.JAVA;
+    //命令版本
     private int version = 0;
     //请求识别编码
     private int opaque = requestId.getAndIncrement();
+    //请求或者响应标识
     private int flag = 0;
+    
+    //请求或者响应提示
     private String remark;
+    //请求的一些属性信息，主要是给请求头用的
     private HashMap<String, String> extFields;
+    //定制化header
     private transient CommandCustomHeader customHeader;
 
     private SerializeType serializeTypeCurrentRPC = serializeTypeConfigInThisServer;
@@ -115,19 +125,36 @@ public class RemotingCommand {
             }
         }
     }
-
+    /**
+     * 去构建生成一个响应命令
+     * @param classHeader  请求响应的header 
+     * @return     
+     * @return RemotingCommand      
+     * @throws
+     */
     public static RemotingCommand createResponseCommand(Class<? extends CommandCustomHeader> classHeader) {
         return createResponseCommand(RemotingSysResponseCode.SYSTEM_ERROR, "not set any response code", classHeader);
     }
-
+    /**
+     * 构建去生成一个响应命令
+     * @param code  响应码
+     * @param remark  提示信息
+     * @param classHeader  响应头
+     * @return     
+     * @return RemotingCommand      
+     * @throws
+     */
     public static RemotingCommand createResponseCommand(int code, String remark,
         Class<? extends CommandCustomHeader> classHeader) {
         RemotingCommand cmd = new RemotingCommand();
+        //设置flag
         cmd.markResponseType();
         cmd.setCode(code);
         cmd.setRemark(remark);
+        //设置命令行版本  version 
         setCmdVersion(cmd);
-
+        
+        //设置 命令的header   customHeader
         if (classHeader != null) {
             try {
                 CommandCustomHeader objectHeader = classHeader.newInstance();
@@ -227,12 +254,17 @@ public class RemotingCommand {
         result[3] = (byte) (source & 0xFF);
         return result;
     }
-
+    /**
+     * 标识响应类型 flag 现在为1
+     *      
+     * @return void      
+     * @throws
+     */
     public void markResponseType() {
         int bits = 1 << RPC_TYPE;
         this.flag |= bits;
     }
-
+    //获取定制的请求头，现在是broker 注册的请求头
     public CommandCustomHeader readCustomHeader() {
         return customHeader;
     }
@@ -241,9 +273,18 @@ public class RemotingCommand {
         this.customHeader = customHeader;
     }
 
+    /**
+     * 从请求中解析请求头
+     * @param classHeader  需要解析成的请求头类型
+     * @return
+     * @throws RemotingCommandException     
+     * @return CommandCustomHeader      
+     * @throws
+     */
     public CommandCustomHeader decodeCommandCustomHeader(
         Class<? extends CommandCustomHeader> classHeader) throws RemotingCommandException {
         CommandCustomHeader objectHeader;
+        //创建一个新的请求头
         try {
             objectHeader = classHeader.newInstance();
         } catch (InstantiationException e) {
@@ -251,7 +292,8 @@ public class RemotingCommand {
         } catch (IllegalAccessException e) {
             return null;
         }
-
+        
+        //设置请求头内容 从属性项extFields中获取值
         if (this.extFields != null) {
 
             Field[] fields = getClazzFields(classHeader);
@@ -261,6 +303,7 @@ public class RemotingCommand {
                     if (!fieldName.startsWith("this")) {
                         try {
                             String value = this.extFields.get(fieldName);
+                            // value 为null 则继续循环
                             if (null == value) {
                                 if (!isFieldNullable(field)) {
                                     throw new RemotingCommandException("the custom field <" + fieldName + "> is null");
@@ -285,7 +328,7 @@ public class RemotingCommand {
                             } else {
                                 throw new RemotingCommandException("the custom field <" + fieldName + "> type is not supported");
                             }
-
+                            //属性设置值	
                             field.set(objectHeader, valueParsed);
 
                         } catch (Throwable e) {
@@ -300,19 +343,33 @@ public class RemotingCommand {
 
         return objectHeader;
     }
-
+    /**
+     * 获取各自的请求头的响应属性
+     * @param classHeader  请求头
+     * @return     
+     * @return Field[]      
+     * @throws
+     */
     private Field[] getClazzFields(Class<? extends CommandCustomHeader> classHeader) {
         Field[] field = CLASS_HASH_MAP.get(classHeader);
 
         if (field == null) {
             field = classHeader.getDeclaredFields();
+            //重新设置时需要加锁
             synchronized (CLASS_HASH_MAP) {
                 CLASS_HASH_MAP.put(classHeader, field);
             }
         }
         return field;
     }
-
+    
+    /**
+     * 查看field 是不是可以为null
+     * @param field  属性
+     * @return     
+     * @return boolean      
+     * @throws
+     */
     private boolean isFieldNullable(Field field) {
         if (!NULLABLE_FIELD_CACHE.containsKey(field)) {
             Annotation annotation = field.getAnnotation(CFNotNull.class);
@@ -322,7 +379,14 @@ public class RemotingCommand {
         }
         return NULLABLE_FIELD_CACHE.get(field);
     }
-
+    
+    /**
+     * 获取class 名称 同getname 包括包名
+     * @param clazz
+     * @return     
+     * @return String      
+     * @throws
+     */
     private String getCanonicalName(Class clazz) {
         String name = CANONICAL_NAME_CACHE.get(clazz);
 
@@ -443,8 +507,8 @@ public class RemotingCommand {
         int bits = 1 << RPC_ONEWAY;
         this.flag |= bits;
     }
-
-    @JSONField(serialize = false)
+    //判断是否是oneway
+    @JSONField(serialize = false) 
     public boolean isOnewayRPC() {
         int bits = 1 << RPC_ONEWAY;
         return (this.flag & bits) == bits;
@@ -453,7 +517,13 @@ public class RemotingCommand {
     public int getCode() {
         return code;
     }
-
+    
+    /**
+     * 设置命令编码
+     * @param code     
+     * @return void      
+     * @throws
+     */
     public void setCode(int code) {
         this.code = code;
     }
@@ -508,7 +578,7 @@ public class RemotingCommand {
     public String getRemark() {
         return remark;
     }
-
+    
     public void setRemark(String remark) {
         this.remark = remark;
     }

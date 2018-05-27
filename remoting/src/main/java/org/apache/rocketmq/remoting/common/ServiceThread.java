@@ -36,7 +36,8 @@ public abstract class ServiceThread implements Runnable {
     }
 
     public abstract String getServiceName();
-
+    
+    //封装的线程启动
     public void start() {
         this.thread.start();
     }

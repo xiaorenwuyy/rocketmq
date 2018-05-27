@@ -81,6 +81,7 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
     //渠道事件监听器 nameserver启动传的是BrokerHousekeepingService
     private final ChannelEventListener channelEventListener;
 
+    //timer 执行器时间
     private final Timer timer = new Timer("ServerHouseKeepingService", true);
     
     //默认的netty 事件线程执行组
@@ -192,7 +193,7 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
      */
     @Override
     public void start() {
-    	//默认的事件线程执行组  用的netty配置类的工作线程数，这个属性可以启动传参进入
+    	//默认的事件线程执行组  用的netty配置类的工作线程数，这个属性可以启动传参进入   是用的工作线程
         this.defaultEventExecutorGroup = new DefaultEventExecutorGroup(
             nettyServerConfig.getServerWorkerThreads(),
             new ThreadFactory() {
@@ -204,7 +205,9 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
                     return new Thread(r, "NettyServerCodecThread_" + this.threadIndex.incrementAndGet());
                 }
             });
-
+        
+        //serverBootstrap 配置
+        //里面有工作线程，执行请求响应处理   用的是工作线程
         ServerBootstrap childHandler =
         	//boss 和selecter
             this.serverBootstrap.group(this.eventLoopGroupBoss, this.eventLoopGroupSelector)
@@ -227,7 +230,7 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
                                 new NettyDecoder(),//解码处理
                                 new IdleStateHandler(0, 0, nettyServerConfig.getServerChannelMaxIdleTimeSeconds()),
                                 new NettyConnectManageHandler(),//连接管理处理
-                                new NettyServerHandler()
+                                new NettyServerHandler()//server 请求响应处理
                             );
                     }
                 });
@@ -235,7 +238,8 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
         if (nettyServerConfig.isServerPooledByteBufAllocatorEnable()) {
             childHandler.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
         }
-
+        
+        //端口绑定
         try {
             ChannelFuture sync = this.serverBootstrap.bind().sync();
             InetSocketAddress addr = (InetSocketAddress) sync.channel().localAddress();
@@ -244,10 +248,12 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
             throw new RuntimeException("this.serverBootstrap.bind().sync() InterruptedException", e1);
         }
 
+        //netty 事件执行器启动另起一个线程 用的是事件线程
         if (this.channelEventListener != null) {
             this.nettyEventExecutor.start();
         }
-
+        
+        //扫描响应表，最终的调用 主要是回调，用的是回调线程
         this.timer.scheduleAtFixedRate(new TimerTask() {
 
             @Override
@@ -260,22 +266,30 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
             }
         }, 1000 * 3, 1000);
     }
-
+    
+    /**
+     * netty 服务关闭
+     */
     @Override
     public void shutdown() {
         try {
+        	//timer 扫描响应表关闭
             if (this.timer != null) {
                 this.timer.cancel();
             }
-
+             
+            //boss group 关闭
             this.eventLoopGroupBoss.shutdownGracefully();
-
+            //选择器 group 关闭
             this.eventLoopGroupSelector.shutdownGracefully();
 
+            
+            
+            //netty 事件监听器线程关闭  用的是事件线程
             if (this.nettyEventExecutor != null) {
                 this.nettyEventExecutor.shutdown();
             }
-
+            //默认的事件线程执行组 关闭，用的是工作线程
             if (this.defaultEventExecutorGroup != null) {
                 this.defaultEventExecutorGroup.shutdownGracefully();
             }
@@ -283,6 +297,7 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
             log.error("NettyRemotingServer shutdown exception, ", e);
         }
 
+        //call back 执行线程关闭  用的是回调线程
         if (this.publicExecutor != null) {
             try {
                 this.publicExecutor.shutdown();

@@ -23,8 +23,7 @@ import org.apache.rocketmq.remoting.ChannelEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
- * broker 保持信息服务
- * @author yuyang
+ * broker 保持信息服务时间监听器  关闭，异常和空转都是销毁注册  连接是啥也不干
  * @date 2018年5月25日
  */
 public class BrokerHousekeepingService implements ChannelEventListener {
@@ -34,7 +33,10 @@ public class BrokerHousekeepingService implements ChannelEventListener {
     public BrokerHousekeepingService(NamesrvController namesrvController) {
         this.namesrvController = namesrvController;
     }
-
+    
+    /**
+     * 连接处理 
+     */
     @Override
     public void onChannelConnect(String remoteAddr, Channel channel) {
     }

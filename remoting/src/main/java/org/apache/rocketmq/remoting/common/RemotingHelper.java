@@ -29,13 +29,24 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-
+/**
+ * 发送请求工具
+ * @author yuyang
+ * @date 2018年5月27日
+ */
 public class RemotingHelper {
     public static final String ROCKETMQ_REMOTING = "RocketmqRemoting";
     public static final String DEFAULT_CHARSET = "UTF-8";
 
     private static final Logger log = LoggerFactory.getLogger(ROCKETMQ_REMOTING);
-
+    
+    /**
+     * 从异常类中获取字符串
+     * @param e  异常
+     * @return     
+     * @return String      
+     * @throws
+     */
     public static String exceptionSimpleDesc(final Throwable e) {
         StringBuffer sb = new StringBuffer();
         if (e != null) {

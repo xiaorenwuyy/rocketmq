@@ -75,6 +75,7 @@ public abstract class NettyRemotingAbstract {
 
     /**
      * This map caches all on-going requests.
+     * 未来响应的的表
      */
     protected final ConcurrentMap<Integer /* opaque */, ResponseFuture> responseTable =
         new ConcurrentHashMap<Integer, ResponseFuture>(256);
@@ -166,7 +167,7 @@ public abstract class NettyRemotingAbstract {
 
     /**
      * Process incoming request command issued by remote peer.
-     * 处理请求
+     * 处理请求  用的是工作线程
      * @param ctx channel handler context.
      * @param cmd request command.
      */
@@ -185,7 +186,7 @@ public abstract class NettyRemotingAbstract {
                         if (rpcHook != null) {
                             rpcHook.doBeforeRequest(RemotingHelper.parseChannelRemoteAddr(ctx.channel()), cmd);
                         }
-
+                        //默认的请求处理器去做处理获取响应
                         final RemotingCommand response = pair.getObject1().processRequest(ctx, cmd);
                         if (rpcHook != null) {
                             rpcHook.doAfterResponse(RemotingHelper.parseChannelRemoteAddr(ctx.channel()), cmd, response);
@@ -196,6 +197,7 @@ public abstract class NettyRemotingAbstract {
                                 response.setOpaque(opaque);
                                 response.markResponseType();
                                 try {
+                                	//写回响应
                                     ctx.writeAndFlush(response);
                                 } catch (Throwable e) {
                                     log.error("process request over, but response failed", e);
@@ -209,7 +211,7 @@ public abstract class NettyRemotingAbstract {
                     } catch (Throwable e) {
                         log.error("process request exception", e);
                         log.error(cmd.toString());
-
+                        //报错后写个空的回去
                         if (!cmd.isOnewayRPC()) {
                             final RemotingCommand response = RemotingCommand.createResponseCommand(RemotingSysResponseCode.SYSTEM_ERROR,
                                 RemotingHelper.exceptionSimpleDesc(e));
@@ -219,7 +221,10 @@ public abstract class NettyRemotingAbstract {
                     }
                 }
             };
-
+            
+            /**
+             * 判断是否要拒绝请求
+             */
             if (pair.getObject1().rejectRequest()) {
                 final RemotingCommand response = RemotingCommand.createResponseCommand(RemotingSysResponseCode.SYSTEM_BUSY,
                     "[REJECTREQUEST]system busy, start flow control for a while");
@@ -229,9 +234,10 @@ public abstract class NettyRemotingAbstract {
             }
 
             try {
+            	//提交工作线程处理   cmd 请求命令
                 final RequestTask requestTask = new RequestTask(run, ctx.channel(), cmd);
                 pair.getObject2().submit(requestTask);
-            } catch (RejectedExecutionException e) {
+            } catch (RejectedExecutionException e) {//太忙，不能执行抛错捕获
                 if ((System.currentTimeMillis() % 10000) == 0) {
                     log.warn(RemotingHelper.parseChannelRemoteAddr(ctx.channel())
                         + ", too many requests and system thread pool busy, RejectedExecutionException "
@@ -247,6 +253,7 @@ public abstract class NettyRemotingAbstract {
                 }
             }
         } else {
+        	//没有pair 是写回响应空的
             String error = " request type " + cmd.getCode() + " not supported";
             final RemotingCommand response =
                 RemotingCommand.createResponseCommand(RemotingSysResponseCode.REQUEST_CODE_NOT_SUPPORTED, error);
@@ -284,6 +291,7 @@ public abstract class NettyRemotingAbstract {
 
     /**
      * Execute callback in callback executor. If callback executor is null, run directly in current thread
+     * 执行callback 函数
      */
     private void executeInvokeCallback(final ResponseFuture responseFuture) {
         boolean runInThisThread = false;
@@ -294,10 +302,12 @@ public abstract class NettyRemotingAbstract {
                     @Override
                     public void run() {
                         try {
+                        	//执行回调
                             responseFuture.executeInvokeCallback();
                         } catch (Throwable e) {
                             log.warn("execute callback in executor exception, and callback throw", e);
                         } finally {
+                        	//资源释放，只释放一次，用原子boolean 类实现
                             responseFuture.release();
                         }
                     }
@@ -309,7 +319,8 @@ public abstract class NettyRemotingAbstract {
         } else {
             runInThisThread = true;
         }
-
+        
+        //如果新开线程有问题那么在当前线程执行
         if (runInThisThread) {
             try {
                 responseFuture.executeInvokeCallback();
@@ -340,6 +351,7 @@ public abstract class NettyRemotingAbstract {
      * <p>
      * This method is periodically invoked to scan and expire deprecated request.
      * </p>
+     * 扫描响应结果
      */
     public void scanResponseTable() {
         final List<ResponseFuture> rfList = new LinkedList<ResponseFuture>();
@@ -349,13 +361,14 @@ public abstract class NettyRemotingAbstract {
             ResponseFuture rep = next.getValue();
 
             if ((rep.getBeginTimestamp() + rep.getTimeoutMillis() + 1000) <= System.currentTimeMillis()) {
-                rep.release();
+                rep.release();//释放资源
                 it.remove();
                 rfList.add(rep);
                 log.warn("remove timeout request, " + rep);
             }
         }
-
+        
+        //超时过期的执行回调  用的是回调线程
         for (ResponseFuture rf : rfList) {
             try {
                 executeInvokeCallback(rf);
@@ -521,7 +534,7 @@ public abstract class NettyRemotingAbstract {
                 log.warn("event queue size[{}] enough, so drop this event {}", this.eventQueue.size(), event.toString());
             }
         }
-
+        //事件执行器，也要封装在线程中 如同，请求响应处理封装在工作线程中
         @Override
         public void run() {
             log.info(this.getServiceName() + " service started");

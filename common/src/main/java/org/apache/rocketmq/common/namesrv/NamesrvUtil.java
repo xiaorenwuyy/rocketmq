@@ -16,7 +16,11 @@
  */
 
 package org.apache.rocketmq.common.namesrv;
-
+/**
+ * nameserver 工具类
+ * @author yuyang
+ * @date 2018年5月27日
+ */
 public class NamesrvUtil {
     public static final String NAMESPACE_ORDER_TOPIC_CONFIG = "ORDER_TOPIC_CONFIG";
 }

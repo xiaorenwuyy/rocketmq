@@ -16,11 +16,16 @@
  */
 
 package org.apache.rocketmq.remoting.protocol;
-
+/**
+ * 远程系统响应码
+ * @author yuyang
+ * @date 2018年5月27日
+ */
 public class RemotingSysResponseCode {
-
+	//响应成功，后面赋值，覆盖
     public static final int SUCCESS = 0;
-
+    
+    //系统错误  一开始赋值
     public static final int SYSTEM_ERROR = 1;
 
     public static final int SYSTEM_BUSY = 2;

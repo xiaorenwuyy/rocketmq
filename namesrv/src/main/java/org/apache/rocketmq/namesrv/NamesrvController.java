@@ -55,8 +55,10 @@ public class NamesrvController {
 
     private RemotingServer remotingServer;
 
+    //传给netty 的事件监听器
     private BrokerHousekeepingService brokerHousekeepingService;
-
+    
+    //默认的工作执行线程
     private ExecutorService remotingExecutor;
     //总的配置类
     private Configuration configuration;
@@ -124,11 +126,16 @@ public class NamesrvController {
             this.remotingServer.registerDefaultProcessor(new ClusterTestRequestProcessor(this, namesrvConfig.getProductEnvName()),
                 this.remotingExecutor);
         } else {
-        	//netty 服务器注册请求处理器，用的是默认的请求处理器	
+        	//netty 服务器注册请求处理器，用的是默认的请求处理器	和执行线程
             this.remotingServer.registerDefaultProcessor(new DefaultRequestProcessor(this), this.remotingExecutor);
         }
     }
-
+    /**
+     * 服务启动，直接调用的netty 服务器启动方法
+     * @throws Exception     
+     * @return void      
+     * @throws
+     */
     public void start() throws Exception {
         this.remotingServer.start();
     }
@@ -140,8 +147,11 @@ public class NamesrvController {
      * @throws
      */
     public void shutdown() {
+    	//netty 服务器关闭
         this.remotingServer.shutdown();
+        //netty 工作线程池关闭
         this.remotingExecutor.shutdown();
+        //规划表实现关闭
         this.scheduledExecutorService.shutdown();
     }
 

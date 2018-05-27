@@ -133,6 +133,7 @@ public class NamesrvStartup {
                 System.exit(-3);
             }
 
+            //注册关闭回调钩子，系统关闭时也关闭服务
             Runtime.getRuntime().addShutdownHook(new ShutdownHookThread(log, new Callable<Void>() {
                 @Override
                 public Void call() throws Exception {
@@ -140,7 +141,8 @@ public class NamesrvStartup {
                     return null;
                 }
             }));
-
+            
+            //启动服务
             controller.start();
 
             String tip = "The Name Server boot success. serializeType=" + RemotingCommand.getSerializeTypeConfigInThisServer();

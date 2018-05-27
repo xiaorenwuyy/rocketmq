@@ -22,14 +22,22 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.rocketmq.remoting.InvokeCallback;
 import org.apache.rocketmq.remoting.common.SemaphoreReleaseOnlyOnce;
 import org.apache.rocketmq.remoting.protocol.RemotingCommand;
-
+/**
+ * 未来响应封装类
+ * @author yuyang
+ * @date 2018年5月27日
+ */
 public class ResponseFuture {
     private final int opaque;
+    //超时时间
     private final long timeoutMillis;
+    //callback 回调 
     private final InvokeCallback invokeCallback;
+    //开始时间戳
     private final long beginTimestamp = System.currentTimeMillis();
     private final CountDownLatch countDownLatch = new CountDownLatch(1);
-
+    
+    //限流类
     private final SemaphoreReleaseOnlyOnce once;
 
     private final AtomicBoolean executeCallbackOnlyOnce = new AtomicBoolean(false);
@@ -44,15 +52,18 @@ public class ResponseFuture {
         this.invokeCallback = invokeCallback;
         this.once = once;
     }
-
+    
+    //callback 封装执行 在一个callback 线程中
     public void executeInvokeCallback() {
         if (invokeCallback != null) {
+        	//只执行一次
             if (this.executeCallbackOnlyOnce.compareAndSet(false, true)) {
                 invokeCallback.operationComplete(this);
             }
         }
     }
-
+    
+    //释放资源  释放一次
     public void release() {
         if (this.once != null) {
             this.once.release();
