@@ -29,8 +29,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+/**
+ * 消息解码类
+ * @author yuyang
+ * @date 2018年5月30日
+ */
 public class MessageDecoder {
+	//消息id 长度
     public final static int MSG_ID_LENGTH = 8 + 8;
 
     public final static Charset CHARSET_UTF8 = Charset.forName("UTF-8");

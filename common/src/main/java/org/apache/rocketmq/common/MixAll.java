@@ -54,29 +54,44 @@ public class MixAll {
     public static final String ROCKETMQ_HOME_ENV = "ROCKETMQ_HOME";
     //mq 主地址
     public static final String ROCKETMQ_HOME_PROPERTY = "rocketmq.home.dir";
+    //nameserver 地址
     public static final String NAMESRV_ADDR_ENV = "NAMESRV_ADDR";
+    //nameserver 地址
     public static final String NAMESRV_ADDR_PROPERTY = "rocketmq.namesrv.addr";
     public static final String MESSAGE_COMPRESS_LEVEL = "rocketmq.message.compressLevel";
     public static final String DEFAULT_NAMESRV_ADDR_LOOKUP = "jmenv.tbsite.net";
+    //nameserver domain 名称
     public static final String WS_DOMAIN_NAME = System.getProperty("rocketmq.namesrv.domain", DEFAULT_NAMESRV_ADDR_LOOKUP);
+    //nameserver domain 群组
     public static final String WS_DOMAIN_SUBGROUP = System.getProperty("rocketmq.namesrv.domain.subgroup", "nsaddr");
     //http://jmenv.tbsite.net:8080/rocketmq/nsaddr
     //public static final String WS_ADDR = "http://" + WS_DOMAIN_NAME + ":8080/rocketmq/" + WS_DOMAIN_SUBGROUP;
+    //系统默认主题名
     public static final String DEFAULT_TOPIC = "TBW102";
+    //benchmark测试主题名
     public static final String BENCHMARK_TOPIC = "BenchmarkTest";
     public static final String DEFAULT_PRODUCER_GROUP = "DEFAULT_PRODUCER";
     public static final String DEFAULT_CONSUMER_GROUP = "DEFAULT_CONSUMER";
+    //工具类消费者组名称
     public static final String TOOLS_CONSUMER_GROUP = "TOOLS_CONSUMER";
+    //过滤服务消费者组名称
     public static final String FILTERSRV_CONSUMER_GROUP = "FILTERSRV_CONSUMER";
     public static final String MONITOR_CONSUMER_GROUP = "__MONITOR_CONSUMER";
     public static final String CLIENT_INNER_PRODUCER_GROUP = "CLIENT_INNER_PRODUCER";
     public static final String SELF_TEST_PRODUCER_GROUP = "SELF_TEST_P_GROUP";
+    //自测消费者组
     public static final String SELF_TEST_CONSUMER_GROUP = "SELF_TEST_C_GROUP";
+    //私有测试主题
     public static final String SELF_TEST_TOPIC = "SELF_TEST_TOPIC";
+    //偏移量移动事件
     public static final String OFFSET_MOVED_EVENT = "OFFSET_MOVED_EVENT";
+    //http 代理组名称
     public static final String ONS_HTTP_PROXY_GROUP = "CID_ONS-HTTP-PROXY";
+    //api禁止 组名称
     public static final String CID_ONSAPI_PERMISSION_GROUP = "CID_ONSAPI_PERMISSION";
+    //api自有 组名称
     public static final String CID_ONSAPI_OWNER_GROUP = "CID_ONSAPI_OWNER";
+    //api pull 组名称
     public static final String CID_ONSAPI_PULL_GROUP = "CID_ONSAPI_PULL";
     public static final String CID_RMQ_SYS_PREFIX = "CID_RMQ_SYS_";
 
@@ -181,13 +196,30 @@ public class MixAll {
         }
     }
 
+    /**
+     * 文件转字符串
+     * @param fileName  文件名  比如主题配置文件   topic.json 等
+     * @return
+     * @throws IOException     
+     * @return String      
+     * @throws
+     */
     public static String file2String(final String fileName) throws IOException {
         File file = new File(fileName);
         return file2String(file);
     }
 
+    /**
+     * 文件转字符串
+     * @param file  文件
+     * @return
+     * @throws IOException     
+     * @return String      
+     * @throws
+     */
     public static String file2String(final File file) throws IOException {
         if (file.exists()) {
+        	//用的是缓冲流
             byte[] data = new byte[(int) file.length()];
             boolean result;
 
@@ -195,6 +227,7 @@ public class MixAll {
             try {
                 inputStream = new FileInputStream(file);
                 int len = inputStream.read(data);
+                //判断文件的长度和读取的长度是否相等
                 result = len == data.length;
             } finally {
                 if (inputStream != null) {
@@ -307,6 +340,13 @@ public class MixAll {
         return properties;
     }
 
+    /**
+     * 把配置类merge 到配置项中去
+     * @param object  配置类
+     * @return     
+     * @return Properties      
+     * @throws
+     */
     public static Properties object2Properties(final Object object) {
         Properties properties = new Properties();
 

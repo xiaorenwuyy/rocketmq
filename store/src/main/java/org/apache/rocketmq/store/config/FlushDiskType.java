@@ -15,8 +15,14 @@
  * limitations under the License.
  */
 package org.apache.rocketmq.store.config;
-
+/**
+ * 刷新硬盘类型
+ * @author yuyang
+ * @date 2018年5月30日
+ */
 public enum FlushDiskType {
+	//异步
     SYNC_FLUSH,
+    //同步
     ASYNC_FLUSH
 }

@@ -19,18 +19,25 @@ package org.apache.rocketmq.store.config;
 import java.io.File;
 import org.apache.rocketmq.common.annotation.ImportantField;
 import org.apache.rocketmq.store.ConsumeQueue;
-
+/**
+ * 消息存储设置
+ * @author yuyang
+ * @date 2018年5月29日
+ */
 public class MessageStoreConfig {
     //The root directory in which the log data is kept
+	//存储路径根目录
     @ImportantField
     private String storePathRootDir = System.getProperty("user.home") + File.separator + "store";
 
     //The directory in which the commitlog is kept
+    //消息中心配置文件路径
     @ImportantField
     private String storePathCommitLog = System.getProperty("user.home") + File.separator + "store"
         + File.separator + "commitlog";
 
     // CommitLog file size,default is 1G
+    //映射文件大小
     private int mapedFileSizeCommitLog = 1024 * 1024 * 1024;
     // ConsumeQueue file size,default is 30W
     private int mapedFileSizeConsumeQueue = 300000 * ConsumeQueue.CQ_STORE_UNIT_SIZE;
@@ -40,6 +47,7 @@ public class MessageStoreConfig {
     private int mappedFileSizeConsumeQueueExt = 48 * 1024 * 1024;
     // Bit count of filter bit map.
     // this will be set by pipe of calculate filter bit map.
+    //消费者队列最大长度
     private int bitMapLengthConsumeQueueExt = 64;
 
     // CommitLog flush interval
@@ -54,7 +62,8 @@ public class MessageStoreConfig {
 
     /**
      * introduced since 4.0.x. Determine whether to use mutex reentrantLock when putting message.<br/>
-     * By default it is set to false indicating using spin lock when putting message.
+     * By default it is set to false indicating using spin lock (自旋锁)when putting message.
+     * 是否用重回锁在put 消息时
      */
     private boolean useReentrantLockWhenPutMessage = false;
 
@@ -81,6 +90,7 @@ public class MessageStoreConfig {
     // Flow control for ConsumeQueue
     private int putMsgIndexHightWater = 600000;
     // The maximum size of a single log file,default is 512K
+    //最大消息大小  bit单位，要除以8进行换算
     private int maxMessageSize = 1024 * 1024 * 4;
     // Whether check the CRC32 of the records consumed.
     // This ensures no on-the-wire or on-disk corruption to the messages occurred.
@@ -105,6 +115,7 @@ public class MessageStoreConfig {
     private int maxTransferBytesOnMessageInDisk = 1024 * 64;
     @ImportantField
     private int maxTransferCountOnMessageInDisk = 8;
+    //在内存中用最大速率获取信息
     @ImportantField
     private int accessMessageInMemoryMaxRatio = 40;
     @ImportantField
@@ -114,6 +125,8 @@ public class MessageStoreConfig {
     private int maxMsgsNumBatch = 64;
     @ImportantField
     private boolean messageIndexSafe = false;
+    
+    //ha 监听端口
     private int haListenPort = 10912;
     private int haSendHeartbeatInterval = 1000 * 5;
     private int haHousekeepingInterval = 1000 * 20;
@@ -121,8 +134,11 @@ public class MessageStoreConfig {
     @ImportantField
     private String haMasterAddress = null;
     private int haSlaveFallbehindMax = 1024 * 1024 * 256;
+    //broker 角色，默认是异步主
     @ImportantField
     private BrokerRole brokerRole = BrokerRole.ASYNC_MASTER;
+    
+    //刷新硬盘类型   默认是异步
     @ImportantField
     private FlushDiskType flushDiskType = FlushDiskType.ASYNC_FLUSH;
     private int syncFlushTimeout = 1000 * 5;

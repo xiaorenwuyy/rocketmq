@@ -46,10 +46,12 @@ public class ConsumerFilterManager extends ConfigManager {
 
     private static final long MS_24_HOUR = 24 * 3600 * 1000;
 
+    //主题过滤数据表
     private ConcurrentMap<String/*Topic*/, FilterDataMapByTopic>
         filterDataByTopic = new ConcurrentHashMap<String/*consumer group*/, FilterDataMapByTopic>(256);
 
     private transient BrokerController brokerController;
+    //布隆过滤器
     private transient BloomFilter bloomFilter;
 
     public ConsumerFilterManager() {
@@ -59,11 +61,13 @@ public class ConsumerFilterManager extends ConfigManager {
 
     public ConsumerFilterManager(BrokerController brokerController) {
         this.brokerController = brokerController;
+        //创建布隆过滤器
         this.bloomFilter = BloomFilter.createByFn(
             brokerController.getBrokerConfig().getMaxErrorRateOfBloomFilter(),
             brokerController.getBrokerConfig().getExpectConsumerNumUseFilter()
         );
         // then set bit map length of store config.
+        // 设置消息中心配置类最大消费队列长度
         brokerController.getMessageStoreConfig().setBitMapLengthConsumeQueueExt(
             this.bloomFilter.getM()
         );
@@ -215,6 +219,7 @@ public class ConsumerFilterManager extends ConfigManager {
         return encode(false);
     }
 
+    //获取配置文件路径
     @Override
     public String configFilePath() {
         if (this.brokerController != null) {
@@ -272,6 +277,7 @@ public class ConsumerFilterManager extends ConfigManager {
                 }
             }
 
+            //如果没有变则设置主题过滤数据表
             if (!bloomChanged) {
                 this.filterDataByTopic = load.filterDataByTopic;
             }
@@ -320,8 +326,14 @@ public class ConsumerFilterManager extends ConfigManager {
         this.filterDataByTopic = filterDataByTopic;
     }
 
+    /**
+     * 主题过滤数据
+     * @author yuyang
+     * @date 2018年5月30日
+     */
     public static class FilterDataMapByTopic {
 
+    	//消费者过滤数据表
         private ConcurrentMap<String/*consumer group*/, ConsumerFilterData>
             groupFilterData = new ConcurrentHashMap<String, ConsumerFilterData>();
 

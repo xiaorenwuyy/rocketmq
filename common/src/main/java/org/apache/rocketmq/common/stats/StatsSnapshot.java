@@ -16,10 +16,17 @@
  */
 
 package org.apache.rocketmq.common.stats;
-
+/**
+ * 状态镜像
+ * @author yuyang
+ * @date 2018年5月29日
+ */
 public class StatsSnapshot {
+	//数量
     private long sum;
+    //每秒的数量
     private double tps;
+    //每次的平均值
     private double avgpt;
 
     public long getSum() {

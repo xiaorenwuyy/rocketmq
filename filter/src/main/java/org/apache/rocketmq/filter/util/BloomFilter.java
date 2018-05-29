@@ -29,7 +29,9 @@ public class BloomFilter {
     public static final Charset UTF_8 = Charset.forName("UTF-8");
 
     // as error rate, 10/100 = 0.1
+    //错误率
     private int f = 10;
+    //用户消费者数量
     private int n = 128;
 
     // hash function num, by calculation.
@@ -39,7 +41,7 @@ public class BloomFilter {
 
     /**
      * Create bloom filter by error rate and mapping num.
-     *
+     *  创建 布隆过滤器
      * @param f error rate
      * @param n num will mapping to bit
      */
@@ -48,7 +50,7 @@ public class BloomFilter {
     }
 
     /**
-     * Constructor.
+     * Constructor.  布隆过滤器
      *
      * @param f error rate
      * @param n num will mapping to bit
@@ -222,6 +224,7 @@ public class BloomFilter {
      * <li>2. {@link org.apache.rocketmq.filter.util.BloomFilterData#getBitNum} must be equal to {@code m} </li>
      * <li>3. {@link org.apache.rocketmq.filter.util.BloomFilterData#getBitPos} is not null</li>
      * <li>4. {@link org.apache.rocketmq.filter.util.BloomFilterData#getBitPos}'s length is equal to {@code k}</li>
+     * 检查是否是合格的过滤器数据
      */
     public boolean isValid(BloomFilterData filterData) {
         if (filterData == null
@@ -297,6 +300,7 @@ public class BloomFilter {
         return String.format("f: %d, n: %d, k: %d, m: %d", f, n, k, m);
     }
 
+    //log 算法
     protected double logMN(double m, double n) {
         return Math.log(n) / Math.log(m);
     }

@@ -25,29 +25,44 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-
+/**
+ * broker 的配置
+ * @author yuyang
+ * @date 2018年5月29日
+ */
 public class BrokerConfig {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.COMMON_LOGGER_NAME);
-
+    
+    //mq 主地址
     private String rocketmqHome = System.getProperty(MixAll.ROCKETMQ_HOME_PROPERTY, System.getenv(MixAll.ROCKETMQ_HOME_ENV));
+    //nameserver 地址
     @ImportantField
     private String namesrvAddr = System.getProperty(MixAll.NAMESRV_ADDR_PROPERTY, System.getenv(MixAll.NAMESRV_ADDR_ENV));
+    //broker ip  用的是当前ip地址
     @ImportantField
     private String brokerIP1 = RemotingUtil.getLocalAddress();
     private String brokerIP2 = RemotingUtil.getLocalAddress();
+    //broker 名称，默认用的是当前的host 名称
     @ImportantField
     private String brokerName = localHostName();
+    
+    //broker 集群名称
     @ImportantField
     private String brokerClusterName = "DefaultCluster";
+    //brokerId 默认是master 0
     @ImportantField
     private long brokerId = MixAll.MASTER_ID;
     private int brokerPermission = PermName.PERM_READ | PermName.PERM_WRITE;
+    //主题默认的队列数量
     private int defaultTopicQueueNums = 8;
+    //是否支持主题自动生成
     @ImportantField
     private boolean autoCreateTopicEnable = true;
 
+    //是否支持集群主题
     private boolean clusterTopicEnable = true;
-
+    
+    //是否支持broker 主题
     private boolean brokerTopicEnable = true;
     @ImportantField
     private boolean autoCreateSubscriptionGroup = true;
@@ -73,10 +88,15 @@ public class BrokerConfig {
     private boolean rejectTransactionMessage = false;
     @ImportantField
     private boolean fetchNamesrvAddrByAddressServer = false;
+    //发送队列空间数
     private int sendThreadPoolQueueCapacity = 10000;
+    //拉取队列空间数
     private int pullThreadPoolQueueCapacity = 100000;
+    //查询队列空间数
     private int queryThreadPoolQueueCapacity = 20000;
+    //客户端管理队列空间数
     private int clientManagerThreadPoolQueueCapacity = 1000000;
+    //客户管理队列空间数
     private int consumerManagerThreadPoolQueueCapacity = 1000000;
 
     private int filterServerNums = 0;
@@ -121,9 +141,11 @@ public class BrokerConfig {
     private boolean enableCalcFilterBitMap = false;
 
     // Expect num of consumers will use filter.
+    //用户过滤器最大消费者期待数量
     private int expectConsumerNumUseFilter = 32;
 
     // Error rate of bloom filter, 1~100.
+    //布隆过滤器 最大过滤器
     private int maxErrorRateOfBloomFilter = 20;
 
     //how long to clean filter data after dead.Default: 24h
@@ -197,6 +219,12 @@ public class BrokerConfig {
         this.slaveReadEnable = slaveReadEnable;
     }
 
+    /**
+     * 获取当前host 的name
+     * @return     
+     * @return String      
+     * @throws
+     */
     public static String localHostName() {
         try {
             return InetAddress.getLocalHost().getHostName();

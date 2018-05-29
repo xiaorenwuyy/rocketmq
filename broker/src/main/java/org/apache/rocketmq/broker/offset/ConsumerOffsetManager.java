@@ -32,11 +32,17 @@ import org.apache.rocketmq.common.constant.LoggerName;
 import org.apache.rocketmq.remoting.protocol.RemotingSerializable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * 消费者偏移管理
+ * @author yuyang
+ * @date 2018年5月29日
+ */
 public class ConsumerOffsetManager extends ConfigManager {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.BROKER_LOGGER_NAME);
+    //主题组分割
     private static final String TOPIC_GROUP_SEPARATOR = "@";
 
+    //偏移表
     private ConcurrentMap<String/* topic@group */, ConcurrentMap<Integer, Long>> offsetTable =
         new ConcurrentHashMap<String, ConcurrentMap<Integer, Long>>(512);
 
@@ -155,12 +161,17 @@ public class ConsumerOffsetManager extends ConfigManager {
     public String encode() {
         return this.encode(false);
     }
-
+    
+    /**
+     * 获取消费者偏移量配置文件路径
+     */
     @Override
     public String configFilePath() {
         return BrokerPathConfigHelper.getConsumerOffsetPath(this.brokerController.getMessageStoreConfig().getStorePathRootDir());
     }
-
+    /**
+     * 解析获取偏移表，并赋值
+     */
     @Override
     public void decode(String jsonString) {
         if (jsonString != null) {

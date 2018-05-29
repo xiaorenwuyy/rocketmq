@@ -15,7 +15,11 @@
  * limitations under the License.
  */
 package org.apache.rocketmq.remoting.netty;
-
+/**
+ * netty 客户端配置
+ * @author yuyang
+ * @date 2018年5月29日
+ */
 public class NettyClientConfig {
     /**
      * Worker thread number
@@ -38,6 +42,7 @@ public class NettyClientConfig {
     private boolean clientPooledByteBufAllocatorEnable = false;
     private boolean clientCloseSocketIfTimeout = false;
 
+    //是否用tls 
     private boolean useTLS;
 
     public boolean isClientCloseSocketIfTimeout() {

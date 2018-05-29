@@ -22,6 +22,7 @@ import org.apache.rocketmq.filter.expression.MQFilterException;
 
 /**
  * Filter spi interface.
+ * 过滤器接口父类
  */
 public interface FilterSpi {
 

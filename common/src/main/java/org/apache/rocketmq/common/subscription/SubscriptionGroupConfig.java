@@ -18,9 +18,14 @@
 package org.apache.rocketmq.common.subscription;
 
 import org.apache.rocketmq.common.MixAll;
-
+/**
+ * 订阅组配置类
+ * @author yuyang
+ * @date 2018年5月29日
+ */
 public class SubscriptionGroupConfig {
 
+	//组名称
     private String groupName;
 
     private boolean consumeEnable = true;

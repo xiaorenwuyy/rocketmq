@@ -15,9 +15,16 @@
  * limitations under the License.
  */
 package org.apache.rocketmq.store.config;
-
+/**
+ * broker 角色
+ * @author yuyang
+ * @date 2018年5月29日
+ */
 public enum BrokerRole {
+	//异步 主
     ASYNC_MASTER,
+    //同步 主
     SYNC_MASTER,
+    //从
     SLAVE;
 }

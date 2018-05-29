@@ -16,7 +16,11 @@
  */
 
 package org.apache.rocketmq.common.filter;
-
+/**
+ * 表达式类型类
+ * @author yuyang
+ * @date 2018年5月30日
+ */
 public class ExpressionType {
 
     /**

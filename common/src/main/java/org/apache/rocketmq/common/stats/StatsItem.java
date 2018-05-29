@@ -23,11 +23,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.rocketmq.common.UtilAll;
 import org.slf4j.Logger;
-
+/**
+ * 状态项单个
+ * @author yuyang
+ * @date 2018年5月29日
+ */
 public class StatsItem {
-
+	//数量值
     private final AtomicLong value = new AtomicLong(0);
-
+    //次数
     private final AtomicLong times = new AtomicLong(0);
 
     private final LinkedList<CallSnapshot> csListMinute = new LinkedList<CallSnapshot>();
@@ -48,7 +52,8 @@ public class StatsItem {
         this.scheduledExecutorService = scheduledExecutorService;
         this.log = log;
     }
-
+    
+    //计算状态统计数据
     private static StatsSnapshot computeStatsData(final LinkedList<CallSnapshot> csList) {
         StatsSnapshot statsSnapshot = new StatsSnapshot();
         synchronized (csList) {
@@ -86,7 +91,7 @@ public class StatsItem {
     public StatsSnapshot getStatsDataInDay() {
         return computeStatsData(this.csListDay);
     }
-
+    
     public void init() {
 
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
@@ -150,6 +155,7 @@ public class StatsItem {
         }, Math.abs(UtilAll.computNextMorningTimeMillis() - System.currentTimeMillis()) - 2000, 1000 * 60 * 60 * 24, TimeUnit.MILLISECONDS);
     }
 
+    //选样添加数据  值保持7条数据---分钟
     public void samplingInSeconds() {
         synchronized (this.csListMinute) {
             this.csListMinute.add(new CallSnapshot(System.currentTimeMillis(), this.times.get(), this.value
@@ -160,6 +166,7 @@ public class StatsItem {
         }
     }
 
+    //选样添加数据  值保持7条数据---小时
     public void samplingInMinutes() {
         synchronized (this.csListHour) {
             this.csListHour.add(new CallSnapshot(System.currentTimeMillis(), this.times.get(), this.value
@@ -169,7 +176,8 @@ public class StatsItem {
             }
         }
     }
-
+    
+    //选样添加数据  值保持7条数据---天
     public void samplingInHour() {
         synchronized (this.csListDay) {
             this.csListDay.add(new CallSnapshot(System.currentTimeMillis(), this.times.get(), this.value
@@ -179,7 +187,8 @@ public class StatsItem {
             }
         }
     }
-
+    
+    //打印统计数据  --分钟
     public void printAtMinutes() {
         StatsSnapshot ss = computeStatsData(this.csListMinute);
         log.info(String.format("[%s] [%s] Stats In One Minute, SUM: %d TPS: %.2f AVGPT: %.2f",
@@ -190,6 +199,7 @@ public class StatsItem {
             ss.getAvgpt()));
     }
 
+    //打印统计数据  --小时
     public void printAtHour() {
         StatsSnapshot ss = computeStatsData(this.csListHour);
         log.info(String.format("[%s] [%s] Stats In One Hour, SUM: %d TPS: %.2f AVGPT: %.2f",
@@ -199,7 +209,7 @@ public class StatsItem {
             ss.getTps(),
             ss.getAvgpt()));
     }
-
+    //打印统计数据  --天
     public void printAtDay() {
         StatsSnapshot ss = computeStatsData(this.csListDay);
         log.info(String.format("[%s] [%s] Stats In One Day, SUM: %d TPS: %.2f AVGPT: %.2f",
@@ -227,10 +237,17 @@ public class StatsItem {
     }
 }
 
+/**
+ * 快照版本
+ * @author yuyang
+ * @date 2018年5月29日
+ */
 class CallSnapshot {
+	//时间戳
     private final long timestamp;
+    //时间
     private final long times;
-
+    //值
     private final long value;
 
     public CallSnapshot(long timestamp, long times, long value) {

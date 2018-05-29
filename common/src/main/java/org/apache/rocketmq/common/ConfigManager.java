@@ -20,12 +20,22 @@ import java.io.IOException;
 import org.apache.rocketmq.common.constant.LoggerName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * 配置管理的父类
+ * @author yuyang
+ * @date 2018年5月29日
+ */
 public abstract class ConfigManager {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.COMMON_LOGGER_NAME);
 
     public abstract String encode();
 
+    /**
+     * 从配置文件获取配置，放入主题配置表中，同时数据版本也同时更新
+     * @return     
+     * @return boolean      
+     * @throws
+     */
     public boolean load() {
         String fileName = null;
         try {
@@ -35,6 +45,7 @@ public abstract class ConfigManager {
             if (null == jsonString || jsonString.length() == 0) {
                 return this.loadBak();
             } else {
+            	//解析json字符串
                 this.decode(jsonString);
                 log.info("load {} OK", fileName);
                 return true;
@@ -46,7 +57,13 @@ public abstract class ConfigManager {
     }
 
     public abstract String configFilePath();
-
+    
+    /**
+     * 抛错了从配置文件备份中获取
+     * @return     
+     * @return boolean      
+     * @throws
+     */
     private boolean loadBak() {
         String fileName = null;
         try {

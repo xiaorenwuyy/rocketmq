@@ -59,7 +59,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.apache.rocketmq.store.config.BrokerRole.SLAVE;
-
+/**
+ * 默认的消息存储中心
+ * @author yuyang
+ * @date 2018年5月30日
+ */
 public class DefaultMessageStore implements MessageStore {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
 
@@ -77,6 +81,7 @@ public class DefaultMessageStore implements MessageStore {
 
     private final IndexService indexService;
 
+    //消息中心映射文件服务
     private final AllocateMappedFileService allocateMappedFileService;
 
     private final ReputMessageService reputMessageService;
@@ -112,13 +117,23 @@ public class DefaultMessageStore implements MessageStore {
 
     boolean shutDownNormal = false;
 
+    /**
+     * 构建消息存储中心
+     * @param messageStoreConfig    消息存储配置类
+     * @param brokerStatsManager   broker 状态管理
+     * @param messageArrivingListener  消息到达监听器
+     * @param brokerConfig   broker 配置类
+     * @throws IOException
+     */
     public DefaultMessageStore(final MessageStoreConfig messageStoreConfig, final BrokerStatsManager brokerStatsManager,
         final MessageArrivingListener messageArrivingListener, final BrokerConfig brokerConfig) throws IOException {
         this.messageArrivingListener = messageArrivingListener;
         this.brokerConfig = brokerConfig;
         this.messageStoreConfig = messageStoreConfig;
         this.brokerStatsManager = brokerStatsManager;
+        //分配映射文件服务类
         this.allocateMappedFileService = new AllocateMappedFileService(this);
+        //日志提交处理类
         this.commitLog = new CommitLog(this);
         this.consumeQueueTable = new ConcurrentHashMap<>(32);
 

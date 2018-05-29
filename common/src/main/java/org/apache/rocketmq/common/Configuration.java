@@ -53,9 +53,9 @@ public class Configuration {
         this.log = log;
     }
     /**
-     * 配置类构造函数
-     * @param log
-     * @param configObjects
+     * 配置类构造函数     设置日志和注册配置类
+     * @param log 日志
+     * @param configObjects  配置类
      */
     public Configuration(Logger log, Object... configObjects) {
         this.log = log;
@@ -66,7 +66,13 @@ public class Configuration {
             registerConfig(configObject);
         }
     }
-
+    
+    /**
+     * 
+     * @param log  日志类
+     * @param storePath 存储的路径 broker 配置路径  
+     * @param configObjects  各种配置类 
+     */
     public Configuration(Logger log, String storePath, Object... configObjects) {
         this(log, configObjects);
         this.storePath = storePath;

@@ -22,11 +22,14 @@ import java.util.Map;
 
 /**
  * Filter factory: support other filter to register.
+ * 过滤工厂
  */
 public class FilterFactory {
 
+	//过滤工厂实例
     public static final FilterFactory INSTANCE = new FilterFactory();
 
+    //过滤器注册表
     protected static final Map<String, FilterSpi> FILTER_SPI_HOLDER = new HashMap<String, FilterSpi>(4);
 
     static {
@@ -35,6 +38,7 @@ public class FilterFactory {
 
     /**
      * Register a filter.
+     * 注册过滤器  比如 sql92 等
      * <br>
      * Note:
      * <li>1. Filter registered will be used in broker server, so take care of it's reliability and performance.</li>
@@ -43,7 +47,7 @@ public class FilterFactory {
         if (FILTER_SPI_HOLDER.containsKey(filterSpi.ofType())) {
             throw new IllegalArgumentException(String.format("Filter spi type(%s) already exist!", filterSpi.ofType()));
         }
-
+        	
         FILTER_SPI_HOLDER.put(filterSpi.ofType(), filterSpi);
     }
 

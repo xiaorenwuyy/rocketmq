@@ -34,39 +34,50 @@ import org.slf4j.LoggerFactory;
 public class SubscriptionGroupManager extends ConfigManager {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.BROKER_LOGGER_NAME);
 
+    //订阅组表
     private final ConcurrentMap<String, SubscriptionGroupConfig> subscriptionGroupTable =
         new ConcurrentHashMap<String, SubscriptionGroupConfig>(1024);
+    //数据版本
     private final DataVersion dataVersion = new DataVersion();
     private transient BrokerController brokerController;
 
     public SubscriptionGroupManager() {
         this.init();
     }
-
+    
+    /**
+     * 构建订阅组管理类并初始化
+     * @param brokerController
+     */
     public SubscriptionGroupManager(BrokerController brokerController) {
         this.brokerController = brokerController;
         this.init();
     }
-
+    
     private void init() {
+    	//在订阅组表中添加工具消费者组
         {
+        	//新建订阅组配置类
             SubscriptionGroupConfig subscriptionGroupConfig = new SubscriptionGroupConfig();
+            //设置组配置类组名
             subscriptionGroupConfig.setGroupName(MixAll.TOOLS_CONSUMER_GROUP);
             this.subscriptionGroupTable.put(MixAll.TOOLS_CONSUMER_GROUP, subscriptionGroupConfig);
         }
-
+        //在订阅组表中添加过滤服务消费者组
         {
             SubscriptionGroupConfig subscriptionGroupConfig = new SubscriptionGroupConfig();
             subscriptionGroupConfig.setGroupName(MixAll.FILTERSRV_CONSUMER_GROUP);
             this.subscriptionGroupTable.put(MixAll.FILTERSRV_CONSUMER_GROUP, subscriptionGroupConfig);
         }
 
+        //在订阅组表中添加自测消费者组
         {
             SubscriptionGroupConfig subscriptionGroupConfig = new SubscriptionGroupConfig();
             subscriptionGroupConfig.setGroupName(MixAll.SELF_TEST_CONSUMER_GROUP);
             this.subscriptionGroupTable.put(MixAll.SELF_TEST_CONSUMER_GROUP, subscriptionGroupConfig);
         }
 
+        //在订阅组表中添加http 代理组
         {
             SubscriptionGroupConfig subscriptionGroupConfig = new SubscriptionGroupConfig();
             subscriptionGroupConfig.setGroupName(MixAll.ONS_HTTP_PROXY_GROUP);
@@ -74,6 +85,7 @@ public class SubscriptionGroupManager extends ConfigManager {
             this.subscriptionGroupTable.put(MixAll.ONS_HTTP_PROXY_GROUP, subscriptionGroupConfig);
         }
 
+        //在订阅组表中添加api pull 组
         {
             SubscriptionGroupConfig subscriptionGroupConfig = new SubscriptionGroupConfig();
             subscriptionGroupConfig.setGroupName(MixAll.CID_ONSAPI_PULL_GROUP);
@@ -81,6 +93,7 @@ public class SubscriptionGroupManager extends ConfigManager {
             this.subscriptionGroupTable.put(MixAll.CID_ONSAPI_PULL_GROUP, subscriptionGroupConfig);
         }
 
+        //在订阅组表中添加api禁止 组
         {
             SubscriptionGroupConfig subscriptionGroupConfig = new SubscriptionGroupConfig();
             subscriptionGroupConfig.setGroupName(MixAll.CID_ONSAPI_PERMISSION_GROUP);
@@ -88,6 +101,7 @@ public class SubscriptionGroupManager extends ConfigManager {
             this.subscriptionGroupTable.put(MixAll.CID_ONSAPI_PERMISSION_GROUP, subscriptionGroupConfig);
         }
 
+        //在订阅组表中添加api自有 组
         {
             SubscriptionGroupConfig subscriptionGroupConfig = new SubscriptionGroupConfig();
             subscriptionGroupConfig.setGroupName(MixAll.CID_ONSAPI_OWNER_GROUP);
@@ -140,12 +154,14 @@ public class SubscriptionGroupManager extends ConfigManager {
         return this.encode(false);
     }
 
+    //获取订阅组路径
     @Override
     public String configFilePath() {
         return BrokerPathConfigHelper.getSubscriptionGroupPath(this.brokerController.getMessageStoreConfig()
             .getStorePathRootDir());
     }
-
+    
+    //解析配置文件json 字符串，获取配置，保证在本类的订阅组表，数据版本也更新，并打印订阅组表数据
     @Override
     public void decode(String jsonString) {
         if (jsonString != null) {

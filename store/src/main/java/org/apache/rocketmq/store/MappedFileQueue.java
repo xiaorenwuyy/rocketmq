@@ -28,19 +28,26 @@ import org.apache.rocketmq.common.UtilAll;
 import org.apache.rocketmq.common.constant.LoggerName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * 映射文件队列
+ * @author yuyang
+ * @date 2018年5月30日
+ */
 public class MappedFileQueue {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
     private static final Logger LOG_ERROR = LoggerFactory.getLogger(LoggerName.STORE_ERROR_LOGGER_NAME);
 
     private static final int DELETE_FILES_BATCH_MAX = 10;
 
+    //存储路径
     private final String storePath;
 
+    //映射文件大小
     private final int mappedFileSize;
 
     private final CopyOnWriteArrayList<MappedFile> mappedFiles = new CopyOnWriteArrayList<MappedFile>();
 
+    //分配映射文件服务
     private final AllocateMappedFileService allocateMappedFileService;
 
     private long flushedWhere = 0;
@@ -48,6 +55,12 @@ public class MappedFileQueue {
 
     private volatile long storeTimestamp = 0;
 
+    /**
+     * 
+     * @param storePath  消息中心提交日志路径  来自消息中心配置类
+     * @param mappedFileSize  映射文件大小   来自消息中心配置类
+     * @param allocateMappedFileService  分配映射文件服务  来自消息中心类
+     */
     public MappedFileQueue(final String storePath, int mappedFileSize,
         AllocateMappedFileService allocateMappedFileService) {
         this.storePath = storePath;

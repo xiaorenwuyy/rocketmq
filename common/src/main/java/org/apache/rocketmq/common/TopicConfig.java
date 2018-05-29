@@ -26,11 +26,13 @@ public class TopicConfig {
     private static final String SEPARATOR = " ";
     public static int defaultReadQueueNums = 16;
     public static int defaultWriteQueueNums = 16;
+    //主题名称
     private String topicName;
-    //对队列数量
+    //对队列数量   默认16 
     private int readQueueNums = defaultReadQueueNums;
-    //写队列数量
+    //写队列数量   默认16
     private int writeQueueNums = defaultWriteQueueNums;
+    //主题的perm
     private int perm = PermName.PERM_READ | PermName.PERM_WRITE;
     private TopicFilterType topicFilterType = TopicFilterType.SINGLE_TAG;
     //topic 同步标志

@@ -39,32 +39,47 @@ import org.apache.rocketmq.common.protocol.body.TopicConfigSerializeWrapper;
 import org.apache.rocketmq.common.sysflag.TopicSysFlag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * 主题配置管理类
+ * @author yuyang
+ * @date 2018年5月29日
+ */
 public class TopicConfigManager extends ConfigManager {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.BROKER_LOGGER_NAME);
     private static final long LOCK_TIMEOUT_MILLIS = 3000;
     private transient final Lock lockTopicConfigTable = new ReentrantLock();
 
+    //主题配置表
     private final ConcurrentMap<String, TopicConfig> topicConfigTable =
         new ConcurrentHashMap<String, TopicConfig>(1024);
     private final DataVersion dataVersion = new DataVersion();
+    //系统主题列表，用的set
     private final Set<String> systemTopicList = new HashSet<String>();
     private transient BrokerController brokerController;
 
     public TopicConfigManager() {
     }
 
+    /**
+     * 构建主题配置管理类
+     * @param brokerController  broker 的controller 传进来是
+     */
     public TopicConfigManager(BrokerController brokerController) {
         this.brokerController = brokerController;
+        //默认添加一个私有的自测的主题
         {
             // MixAll.SELF_TEST_TOPIC
             String topic = MixAll.SELF_TEST_TOPIC;
+            //新建主题配置
             TopicConfig topicConfig = new TopicConfig(topic);
+            //系统主题列表添加  里面是主题的主题名
             this.systemTopicList.add(topic);
             topicConfig.setReadQueueNums(1);
             topicConfig.setWriteQueueNums(1);
+            //主题配置表添加  key 为主题名，value 是主题配置类
             this.topicConfigTable.put(topicConfig.getTopicName(), topicConfig);
         }
+        //默认的主题配置添加  数量默认为8
         {
             // MixAll.DEFAULT_TOPIC
             if (this.brokerController.getBrokerConfig().isAutoCreateTopicEnable()) {
@@ -80,6 +95,7 @@ public class TopicConfigManager extends ConfigManager {
                 this.topicConfigTable.put(topicConfig.getTopicName(), topicConfig);
             }
         }
+        //benchmark 主题配置添加
         {
             // MixAll.BENCHMARK_TOPIC
             String topic = MixAll.BENCHMARK_TOPIC;
@@ -89,6 +105,7 @@ public class TopicConfigManager extends ConfigManager {
             topicConfig.setWriteQueueNums(1024);
             this.topicConfigTable.put(topicConfig.getTopicName(), topicConfig);
         }
+        //broker 集权主题配置添加
         {
 
             String topic = this.brokerController.getBrokerConfig().getBrokerClusterName();
@@ -101,6 +118,7 @@ public class TopicConfigManager extends ConfigManager {
             topicConfig.setPerm(perm);
             this.topicConfigTable.put(topicConfig.getTopicName(), topicConfig);
         }
+        //broker 主题配置添加
         {
 
             String topic = this.brokerController.getBrokerConfig().getBrokerName();
@@ -115,6 +133,7 @@ public class TopicConfigManager extends ConfigManager {
             topicConfig.setPerm(perm);
             this.topicConfigTable.put(topicConfig.getTopicName(), topicConfig);
         }
+        //broker 主题配置添加
         {
             // MixAll.OFFSET_MOVED_EVENT
             String topic = MixAll.OFFSET_MOVED_EVENT;
@@ -380,20 +399,26 @@ public class TopicConfigManager extends ConfigManager {
     public String encode() {
         return encode(false);
     }
-
+    
+    //获取配置文件 从controller 的 消息中心配置类中获取主题配置路径
     @Override
     public String configFilePath() {
         return BrokerPathConfigHelper.getTopicConfigPath(this.brokerController.getMessageStoreConfig()
             .getStorePathRootDir());
     }
 
+    /**
+     * 解析json 字符串
+     */
     @Override
     public void decode(String jsonString) {
         if (jsonString != null) {
             TopicConfigSerializeWrapper topicConfigSerializeWrapper =
                 TopicConfigSerializeWrapper.fromJson(jsonString, TopicConfigSerializeWrapper.class);
+            //不为空 设置
             if (topicConfigSerializeWrapper != null) {
                 this.topicConfigTable.putAll(topicConfigSerializeWrapper.getTopicConfigTable());
+                //数据版本设置新值
                 this.dataVersion.assignNewOne(topicConfigSerializeWrapper.getDataVersion());
                 this.printLoadDataWhenFirstBoot(topicConfigSerializeWrapper);
             }
@@ -407,6 +432,12 @@ public class TopicConfigManager extends ConfigManager {
         return topicConfigSerializeWrapper.toJson(prettyFormat);
     }
 
+    /**
+     * 主题配置封装类  打印主题配置表
+     * @param tcs     主题配置封装类
+     * @return void      
+     * @throws
+     */
     private void printLoadDataWhenFirstBoot(final TopicConfigSerializeWrapper tcs) {
         Iterator<Entry<String, TopicConfig>> it = tcs.getTopicConfigTable().entrySet().iterator();
         while (it.hasNext()) {

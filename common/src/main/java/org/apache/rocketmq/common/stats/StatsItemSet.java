@@ -25,24 +25,42 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.apache.rocketmq.common.UtilAll;
 import org.slf4j.Logger;
-
+/**
+ * 状态项配置集合
+ * @author yuyang
+ * @date 2018年5月29日
+ */
 public class StatsItemSet {
     private final ConcurrentMap<String/* key */, StatsItem> statsItemTable =
         new ConcurrentHashMap<String, StatsItem>(128);
 
+    //状态名称
     private final String statsName;
+    //计划任务执行器
     private final ScheduledExecutorService scheduledExecutorService;
     private final Logger log;
 
+    /**
+     * 构建状态项目集合并做初始化
+     * @param statsName  状态项目
+     * @param scheduledExecutorService
+     * @param log  日志
+     */
     public StatsItemSet(String statsName, ScheduledExecutorService scheduledExecutorService, Logger log) {
         this.statsName = statsName;
         this.scheduledExecutorService = scheduledExecutorService;
         this.log = log;
         this.init();
     }
-
+    
+    /**
+     * 状态项配置初始化   主要是执行计划 打印一些数据
+     *      
+     * @return void      
+     * @throws
+     */
     public void init() {
-
+    	//十秒钟执行一次  也就是说十秒钟添加数据样例一次  ,一分钟执行6+1次
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
@@ -53,6 +71,7 @@ public class StatsItemSet {
             }
         }, 0, 10, TimeUnit.SECONDS);
 
+        //十分钟执行一次  也就是说十分钟添加数据样例一次   一小时执行6+1次
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
@@ -62,7 +81,8 @@ public class StatsItemSet {
                 }
             }
         }, 0, 10, TimeUnit.MINUTES);
-
+        
+        //一小时执行一次  也就是说一小时添加数据样例一次   一天执行24+1次
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
@@ -73,6 +93,7 @@ public class StatsItemSet {
             }
         }, 0, 1, TimeUnit.HOURS);
 
+        //打印 -一分钟执行一次
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
@@ -83,6 +104,7 @@ public class StatsItemSet {
             }
         }, Math.abs(UtilAll.computNextMinutesTimeMillis() - System.currentTimeMillis()), 1000 * 60, TimeUnit.MILLISECONDS);
 
+        //打印 -一小时执行一次
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
@@ -93,6 +115,7 @@ public class StatsItemSet {
             }
         }, Math.abs(UtilAll.computNextHourTimeMillis() - System.currentTimeMillis()), 1000 * 60 * 60, TimeUnit.MILLISECONDS);
 
+        //打印 -一天执行一次
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
@@ -104,6 +127,7 @@ public class StatsItemSet {
         }, Math.abs(UtilAll.computNextMorningTimeMillis() - System.currentTimeMillis()), 1000 * 60 * 60 * 24, TimeUnit.MILLISECONDS);
     }
 
+    //秒内抽样  10秒一次
     private void samplingInSeconds() {
         Iterator<Entry<String, StatsItem>> it = this.statsItemTable.entrySet().iterator();
         while (it.hasNext()) {
@@ -112,6 +136,7 @@ public class StatsItemSet {
         }
     }
 
+    //分钟抽样 10分钟一次
     private void samplingInMinutes() {
         Iterator<Entry<String, StatsItem>> it = this.statsItemTable.entrySet().iterator();
         while (it.hasNext()) {
@@ -120,6 +145,7 @@ public class StatsItemSet {
         }
     }
 
+    //小时抽样 1小时一次
     private void samplingInHour() {
         Iterator<Entry<String, StatsItem>> it = this.statsItemTable.entrySet().iterator();
         while (it.hasNext()) {
@@ -128,6 +154,7 @@ public class StatsItemSet {
         }
     }
 
+    //打印统计  一分钟打印一次
     private void printAtMinutes() {
         Iterator<Entry<String, StatsItem>> it = this.statsItemTable.entrySet().iterator();
         while (it.hasNext()) {
@@ -136,6 +163,7 @@ public class StatsItemSet {
         }
     }
 
+    //打印统计  一小时打印一次
     private void printAtHour() {
         Iterator<Entry<String, StatsItem>> it = this.statsItemTable.entrySet().iterator();
         while (it.hasNext()) {
@@ -143,7 +171,8 @@ public class StatsItemSet {
             next.getValue().printAtHour();
         }
     }
-
+    
+    //打印统计  一天打印一次
     private void printAtDay() {
         Iterator<Entry<String, StatsItem>> it = this.statsItemTable.entrySet().iterator();
         while (it.hasNext()) {

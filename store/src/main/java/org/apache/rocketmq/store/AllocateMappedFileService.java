@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Create MappedFile in advance
+ * 分配映射文件服务类
  */
 public class AllocateMappedFileService extends ServiceThread {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
@@ -42,8 +43,10 @@ public class AllocateMappedFileService extends ServiceThread {
     private PriorityBlockingQueue<AllocateRequest> requestQueue =
         new PriorityBlockingQueue<AllocateRequest>();
     private volatile boolean hasException = false;
+    //消息存储中心
     private DefaultMessageStore messageStore;
 
+    //分配映射文件服务类
     public AllocateMappedFileService(DefaultMessageStore messageStore) {
         this.messageStore = messageStore;
     }

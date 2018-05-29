@@ -28,9 +28,11 @@ import org.apache.rocketmq.filter.parser.SelectorParser;
  * <p>
  * Do not use this filter directly.Use {@link FilterFactory#get} to select a filter.
  * </p>
+ * sql过滤器
  */
 public class SqlFilter implements FilterSpi {
 
+	//数据库的编译
     @Override
     public Expression compile(final String expr) throws MQFilterException {
         return SelectorParser.parse(expr);

@@ -41,6 +41,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Store all metadata downtime for recovery, data protection reliability
+ * 
+ * 提交日志类
  */
 public class CommitLog {
     // Message's MAGIC CODE daa320a7
@@ -48,6 +50,7 @@ public class CommitLog {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
     // End of file empty MAGIC CODE cbd43194
     private final static int BLANK_MAGIC_CODE = 0xBBCCDDEE ^ 1880681586 + 8;
+    //映射文件队列
     private final MappedFileQueue mappedFileQueue;
     private final DefaultMessageStore defaultMessageStore;
     private final FlushCommitLogService flushCommitLogService;
@@ -63,19 +66,25 @@ public class CommitLog {
     private volatile long beginTimeInLock = 0;
     private final PutMessageLock putMessageLock;
 
+    /**
+     * 构建提交日志类
+     * @param defaultMessageStore  默认的消息中心类
+     */
     public CommitLog(final DefaultMessageStore defaultMessageStore) {
         this.mappedFileQueue = new MappedFileQueue(defaultMessageStore.getMessageStoreConfig().getStorePathCommitLog(),
             defaultMessageStore.getMessageStoreConfig().getMapedFileSizeCommitLog(), defaultMessageStore.getAllocateMappedFileService());
         this.defaultMessageStore = defaultMessageStore;
 
         if (FlushDiskType.SYNC_FLUSH == defaultMessageStore.getMessageStoreConfig().getFlushDiskType()) {
-            this.flushCommitLogService = new GroupCommitService();
+            this.flushCommitLogService = new GroupCommitService();//同步刷新
         } else {
-            this.flushCommitLogService = new FlushRealTimeService();
+            this.flushCommitLogService = new FlushRealTimeService();//异步刷新
         }
 
+        //提交日志服务
         this.commitLogService = new CommitRealTimeService();
 
+        //追加日志回调函数服务类
         this.appendMessageCallback = new DefaultAppendMessageCallback(defaultMessageStore.getMessageStoreConfig().getMaxMessageSize());
         batchEncoderThreadLocal = new ThreadLocal<MessageExtBatchEncoder>() {
             @Override
@@ -83,6 +92,7 @@ public class CommitLog {
                 return new MessageExtBatchEncoder(defaultMessageStore.getMessageStoreConfig().getMaxMessageSize());
             }
         };
+        //put 消息锁封装类
         this.putMessageLock = defaultMessageStore.getMessageStoreConfig().isUseReentrantLockWhenPutMessage() ? new PutMessageReentrantLock() : new PutMessageSpinLock();
 
     }
@@ -942,6 +952,11 @@ public class CommitLog {
         }
     }
 
+    /**
+     * 异步刷新
+     * @author yuyang
+     * @date 2018年5月30日
+     */
     class FlushRealTimeService extends FlushCommitLogService {
         private long lastFlushTimestamp = 0;
         private long printTimes = 0;
@@ -1054,6 +1069,7 @@ public class CommitLog {
 
     /**
      * GroupCommit Service
+     * 组提交服务  同步刷新日志
      */
     class GroupCommitService extends FlushCommitLogService {
         private volatile List<GroupCommitRequest> requestsWrite = new ArrayList<GroupCommitRequest>();
@@ -1150,14 +1166,22 @@ public class CommitLog {
             return 1000 * 60 * 5;
         }
     }
-
+    /**
+     * 默认的消息追加回调类
+     * @author yuyang
+     * @date 2018年5月30日
+     */
     class DefaultAppendMessageCallback implements AppendMessageCallback {
         // File at the end of the minimum fixed length empty
+    	//文件末尾最小空大小
         private static final int END_FILE_MIN_BLANK_LENGTH = 4 + 4;
+        //在硬盘分配的消息id 的空间区域
         private final ByteBuffer msgIdMemory;
         // Store the message content
+        ////在硬盘分配的消息消息内容 的空间区域
         private final ByteBuffer msgStoreItemMemory;
         // The maximum length of the message
+        //消息的最大长度
         private final int maxMessageSize;
         // Build Message Key
         private final StringBuilder keyBuilder = new StringBuilder();
@@ -1410,7 +1434,12 @@ public class CommitLog {
         }
 
     }
-
+    
+    /**
+     * 日志扩展编码类
+     * @author yuyang
+     * @date 2018年5月30日
+     */
     public static class MessageExtBatchEncoder {
         // Store the message content
         private final ByteBuffer msgBatchMemory;

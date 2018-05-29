@@ -24,6 +24,7 @@ package org.apache.rocketmq.remoting.netty;
 public class NettySystemConfig {
     public static final String COM_ROCKETMQ_REMOTING_NETTY_POOLED_BYTE_BUF_ALLOCATOR_ENABLE =
         "com.rocketmq.remoting.nettyPooledByteBufAllocatorEnable";
+    //socket 发送的缓存大小常量
     public static final String COM_ROCKETMQ_REMOTING_SOCKET_SNDBUF_SIZE =
         "com.rocketmq.remoting.socket.sndbuf.size";
     public static final String COM_ROCKETMQ_REMOTING_SOCKET_RCVBUF_SIZE =
