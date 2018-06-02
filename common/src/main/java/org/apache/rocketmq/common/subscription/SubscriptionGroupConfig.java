@@ -28,6 +28,7 @@ public class SubscriptionGroupConfig {
 	//组名称
     private String groupName;
 
+    //是否支持消费者
     private boolean consumeEnable = true;
     private boolean consumeFromMinEnable = true;
 

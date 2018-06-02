@@ -50,9 +50,14 @@ import org.apache.rocketmq.store.MessageExtBrokerInner;
 import org.apache.rocketmq.store.PutMessageResult;
 import org.apache.rocketmq.store.config.StorePathConfigHelper;
 import org.apache.rocketmq.store.stats.BrokerStatsManager;
-
+/**
+ * 发送消息处理器
+ * @author yuyang
+ * @date 2018年5月30日
+ */
 public class SendMessageProcessor extends AbstractSendMessageProcessor implements NettyRequestProcessor {
 
+	//消费者消息钩子列表
     private List<ConsumeMessageHook> consumeMessageHookList;
 
     public SendMessageProcessor(final BrokerController brokerController) {
@@ -568,7 +573,8 @@ public class SendMessageProcessor extends AbstractSendMessageProcessor implement
 
         return String.format("CL: %5.2f CQ: %5.2f INDEX: %5.2f", physicRatio, logisRatio, indexRatio);
     }
-
+    
+    //注册消费者消息钩子列表
     public void registerConsumeMessageHook(List<ConsumeMessageHook> consumeMessageHookList) {
         this.consumeMessageHookList = consumeMessageHookList;
     }

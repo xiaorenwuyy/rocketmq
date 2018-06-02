@@ -30,9 +30,15 @@ import org.apache.rocketmq.store.MessageStore;
 import org.apache.rocketmq.store.PutMessageResult;
 import org.apache.rocketmq.store.QueryMessageResult;
 import org.apache.rocketmq.store.SelectMappedBufferResult;
-
+/**
+ * 抽象插件消息中心
+ * @author yuyang
+ * @date 2018年5月30日
+ */
 public abstract class AbstractPluginMessageStore implements MessageStore {
-    protected MessageStore next = null;
+    //消息中心
+	protected MessageStore next = null;
+	//消息中心插件上下文
     protected MessageStorePluginContext context;
 
     public AbstractPluginMessageStore(MessageStorePluginContext context, MessageStore next) {

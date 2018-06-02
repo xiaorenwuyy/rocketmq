@@ -103,6 +103,13 @@ public class UtilAll {
         return timeMillisToHumanString(System.currentTimeMillis());
     }
 
+    /**
+     * 格式化时间
+     * @param t 时间戳
+     * @return     
+     * @return String      
+     * @throws
+     */
     public static String timeMillisToHumanString(final long t) {
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(t);
@@ -374,10 +381,12 @@ public class UtilAll {
         return true;
     }
 
+    //获取线程堆栈信息
     public static String jstack() {
         return jstack(Thread.getAllStackTraces());
     }
 
+    //获取堆栈信息
     public static String jstack(Map<Thread, StackTraceElement[]> map) {
         StringBuilder result = new StringBuilder();
         try {
@@ -387,6 +396,7 @@ public class UtilAll {
                 StackTraceElement[] elements = entry.getValue();
                 Thread thread = entry.getKey();
                 if (elements != null && elements.length > 0) {
+                	//线程名
                     String threadName = entry.getKey().getName();
                     result.append(String.format("%-40sTID: %d STATE: %s%n", threadName, thread.getId(), thread.getState()));
                     for (StackTraceElement el : elements) {

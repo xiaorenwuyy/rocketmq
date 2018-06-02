@@ -47,10 +47,12 @@ public class ConsumerFilterData {
     private BloomFilterData bloomFilterData;
     private long clientVersion;
 
+    //是否已死
     public boolean isDead() {
         return this.deadTime >= this.bornTime;
     }
 
+    //在红线后多久
     public long howLongAfterDeath() {
         if (isDead()) {
             return System.currentTimeMillis() - getDeadTime();

@@ -52,6 +52,7 @@ public class TopicConfigManager extends ConfigManager {
     //主题配置表
     private final ConcurrentMap<String, TopicConfig> topicConfigTable =
         new ConcurrentHashMap<String, TopicConfig>(1024);
+    //数据版本
     private final DataVersion dataVersion = new DataVersion();
     //系统主题列表，用的set
     private final Set<String> systemTopicList = new HashSet<String>();

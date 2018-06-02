@@ -22,12 +22,18 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.rocketmq.common.UtilAll;
 import org.slf4j.Logger;
-
+/**
+ * 状态项
+ * @author yuyang
+ * @date 2018年5月31日
+ */
 public class MomentStatsItem {
 
+	//值
     private final AtomicLong value = new AtomicLong(0);
 
     private final String statsName;
+    //状态key
     private final String statsKey;
     private final ScheduledExecutorService scheduledExecutorService;
     private final Logger log;

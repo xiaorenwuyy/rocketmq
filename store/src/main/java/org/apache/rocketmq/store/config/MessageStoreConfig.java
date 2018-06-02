@@ -42,21 +42,26 @@ public class MessageStoreConfig {
     // ConsumeQueue file size,default is 30W
     private int mapedFileSizeConsumeQueue = 300000 * ConsumeQueue.CQ_STORE_UNIT_SIZE;
     // enable consume queue ext
+    //是否支持消费者队列扩展
     private boolean enableConsumeQueueExt = false;
     // ConsumeQueue extend file size, 48M
+    //映射文件大小  扩展的
     private int mappedFileSizeConsumeQueueExt = 48 * 1024 * 1024;
     // Bit count of filter bit map.
     // this will be set by pipe of calculate filter bit map.
     //消费者队列最大长度
+    //bitMap 长度 消费者队列扩展
     private int bitMapLengthConsumeQueueExt = 64;
 
     // CommitLog flush interval
     // flush data to disk
+    //提交中间间隔时间
     @ImportantField
     private int flushIntervalCommitLog = 500;
 
     // Only used if TransientStorePool enabled
     // flush data to FileChannel
+    //日志提交间隔
     @ImportantField
     private int commitIntervalCommitLog = 200;
 
@@ -68,11 +73,14 @@ public class MessageStoreConfig {
     private boolean useReentrantLockWhenPutMessage = false;
 
     // Whether schedule flush,default is real-time
+    //刷新提交日志是否休息  默认是false
     @ImportantField
     private boolean flushCommitLogTimed = false;
     // ConsumeQueue flush interval
+    //消费者队列刷新间隔
     private int flushIntervalConsumeQueue = 1000;
     // Resource reclaim interval
+    //清除资源时间间隔
     private int cleanResourceInterval = 10000;
     // CommitLog removal interval
     private int deleteCommitLogFilesInterval = 100;
@@ -97,15 +105,21 @@ public class MessageStoreConfig {
     // This check adds some overhead,so it may be disabled in cases seeking extreme performance.
     private boolean checkCRCOnRecover = true;
     // How many pages are to be flushed when flush CommitLog
+    //刷新提交日志最小页数
     private int flushCommitLogLeastPages = 4;
     // How many pages are to be committed when commit data to file
+    //日志提交页数
     private int commitCommitLogLeastPages = 4;
     // Flush page size when the disk in warming state
     private int flushLeastPagesWhenWarmMapedFile = 1024 / 4 * 16;
     // How many pages are to be flushed when flush ConsumeQueue
+    //消费者队列刷新页数
     private int flushConsumeQueueLeastPages = 2;
+    //刷新提交日志通过时间
     private int flushCommitLogThoroughInterval = 1000 * 10;
+    //日志提交通过时间
     private int commitCommitLogThoroughInterval = 200;
+    //消费者队列通过间隔时间
     private int flushConsumeQueueThoroughInterval = 1000 * 60;
     @ImportantField
     private int maxTransferBytesOnMessageInMemory = 1024 * 256;
@@ -118,9 +132,12 @@ public class MessageStoreConfig {
     //在内存中用最大速率获取信息
     @ImportantField
     private int accessMessageInMemoryMaxRatio = 40;
+    //是否支持消息索引
     @ImportantField
     private boolean messageIndexEnable = true;
+    //hash 最大值
     private int maxHashSlotNum = 5000000;
+    //最大索引值
     private int maxIndexNum = 5000000 * 4;
     private int maxMsgsNumBatch = 64;
     @ImportantField
@@ -131,6 +148,7 @@ public class MessageStoreConfig {
     private int haSendHeartbeatInterval = 1000 * 5;
     private int haHousekeepingInterval = 1000 * 20;
     private int haTransferBatchSize = 1024 * 32;
+    //ha 主地址
     @ImportantField
     private String haMasterAddress = null;
     private int haSlaveFallbehindMax = 1024 * 1024 * 256;
@@ -142,20 +160,25 @@ public class MessageStoreConfig {
     @ImportantField
     private FlushDiskType flushDiskType = FlushDiskType.ASYNC_FLUSH;
     private int syncFlushTimeout = 1000 * 5;
+    //消息延迟级别
     private String messageDelayLevel = "1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h";
     private long flushDelayOffsetInterval = 1000 * 10;
     @ImportantField
     private boolean cleanFileForciblyEnable = true;
     private boolean warmMapedFileEnable = false;
     private boolean offsetCheckInSlave = false;
+    //是否支持调试锁 默认不支持
     private boolean debugLockEnable = false;
+    //是否支持重复
     private boolean duplicationEnable = false;
     private boolean diskFallRecorded = true;
     private long osPageCacheBusyTimeOutMills = 1000;
     private int defaultQueryMaxNum = 32;
 
+    //是否支持transient 存储池
     @ImportantField
     private boolean transientStorePoolEnable = false;
+    //transient 存储工具池大小
     private int transientStorePoolSize = 5;
     private boolean fastFailIfNoBufferInStorePool = false;
 
@@ -622,6 +645,7 @@ public class MessageStoreConfig {
     /**
      * Enable transient commitLog store poll only if transientStorePoolEnable is true and the FlushDiskType is
      * ASYNC_FLUSH
+     * 是否支持  transient 存储池
      *
      * @return <tt>true</tt> or <tt>false</tt>
      */

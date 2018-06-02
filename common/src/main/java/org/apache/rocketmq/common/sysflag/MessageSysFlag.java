@@ -15,15 +15,24 @@
  * limitations under the License.
  */
 package org.apache.rocketmq.common.sysflag;
-
+/**
+ * 消息系统标志类
+ * @author yuyang
+ * @date 2018年5月30日
+ */
 public class MessageSysFlag {
     public final static int COMPRESSED_FLAG = 0x1;
     public final static int MULTI_TAGS_FLAG = 0x1 << 1;
+    //事务无类型
     public final static int TRANSACTION_NOT_TYPE = 0;
+    //事务预先类型
     public final static int TRANSACTION_PREPARED_TYPE = 0x1 << 2;
+    //事务提交类
     public final static int TRANSACTION_COMMIT_TYPE = 0x2 << 2;
+    //事务回滚类
     public final static int TRANSACTION_ROLLBACK_TYPE = 0x3 << 2;
 
+    //获取事务值
     public static int getTransactionValue(final int flag) {
         return flag & TRANSACTION_ROLLBACK_TYPE;
     }

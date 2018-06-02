@@ -28,12 +28,18 @@ import org.apache.rocketmq.common.help.FAQUrl;
 import org.apache.rocketmq.common.utils.HttpTinyClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * 地址类
+ * @author yuyang
+ * @date 2018年5月31日
+ */
 public class TopAddressing {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.COMMON_LOGGER_NAME);
 
     private String nsAddr;
+    //ws 地址
     private String wsAddr;
+    //单元名称
     private String unitName;
 
     public TopAddressing(final String wsAddr) {
@@ -45,6 +51,7 @@ public class TopAddressing {
         this.unitName = unitName;
     }
 
+    //清除反应结果的字符串中的新行
     private static String clearNewLine(final String str) {
         String newString = str.trim();
         int index = newString.indexOf("\r");
@@ -60,17 +67,27 @@ public class TopAddressing {
         return newString;
     }
 
+    //获取ns 地址
     public final String fetchNSAddr() {
         return fetchNSAddr(true, 3000);
     }
 
+    /**
+     * 获取ns 地址
+     * @param verbose  冗长的
+     * @param timeoutMills
+     * @return     
+     * @return String      
+     * @throws
+     */
     public final String fetchNSAddr(boolean verbose, long timeoutMills) {
         String url = this.wsAddr;
-        try {
+        try {  
             if (!UtilAll.isBlank(this.unitName)) {
                 url = url + "-" + this.unitName + "?nofix=1";
             }
             HttpTinyClient.HttpResult result = HttpTinyClient.httpGet(url, null, null, "UTF-8", timeoutMills);
+            //成功通信
             if (200 == result.code) {
                 String responseStr = result.content;
                 if (responseStr != null) {
@@ -86,7 +103,7 @@ public class TopAddressing {
                 log.error("fetch name server address exception", e);
             }
         }
-
+        //显示日志
         if (verbose) {
             String errorMsg =
                 "connect to " + url + " failed, maybe the domain name " + MixAll.getWSAddr() + " not bind in /etc/hosts";

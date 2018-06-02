@@ -23,7 +23,11 @@ import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
+/**
+ * broker 线程池执行器
+ * @author yuyang
+ * @date 2018年5月30日
+ */
 public class BrokerFixedThreadPoolExecutor extends ThreadPoolExecutor {
     public BrokerFixedThreadPoolExecutor(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime,
         final TimeUnit unit,

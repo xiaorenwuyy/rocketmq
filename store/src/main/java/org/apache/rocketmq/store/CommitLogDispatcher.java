@@ -19,8 +19,10 @@ package org.apache.rocketmq.store;
 
 /**
  * Dispatcher of commit log.
+ * 提交日志分发类接口
  */
 public interface CommitLogDispatcher {
-
+	
+	//分发
     void dispatch(final DispatchRequest request);
 }

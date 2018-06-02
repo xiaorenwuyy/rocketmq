@@ -67,7 +67,8 @@ public class BrokerStartup {
 
     public static BrokerController start(BrokerController controller) {
         try {
-
+        	//没做null 的判断 todo
+        	//启动
             controller.start();
 
             String tip = "The broker[" + controller.getBrokerConfig().getBrokerName() + ", "
@@ -243,7 +244,8 @@ public class BrokerStartup {
                 controller.shutdown();
                 System.exit(-3);
             }
-
+            
+            //注册钩子方法，用于关闭服务
             Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                 private volatile boolean hasShutdown = false;
                 private AtomicInteger shutdownTimes = new AtomicInteger(0);

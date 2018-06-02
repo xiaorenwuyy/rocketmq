@@ -75,6 +75,7 @@ public class BrokerStatsManager {
     //状态表，构造方法时放入数据
     private final HashMap<String, StatsItemSet> statsTable = new HashMap<String, StatsItemSet>();
     private final String clusterName;
+    //状态大小集合类
     private final MomentStatsItemSet momentStatsItemSetFallSize = new MomentStatsItemSet(GROUP_GET_FALL_SIZE, scheduledExecutorService, log);
     private final MomentStatsItemSet momentStatsItemSetFallTime = new MomentStatsItemSet(GROUP_GET_FALL_TIME, scheduledExecutorService, log);
 

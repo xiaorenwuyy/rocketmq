@@ -17,33 +17,49 @@
 package org.apache.rocketmq.store.config;
 
 import java.io.File;
-
+/**
+ * 存储路径帮助类
+ * @author yuyang
+ * @date 2018年5月30日
+ */
 public class StorePathConfigHelper {
 
     public static String getStorePathConsumeQueue(final String rootDir) {
         return rootDir + File.separator + "consumequeue";
     }
 
+    //获取消费者扩展文件
     public static String getStorePathConsumeQueueExt(final String rootDir) {
         return rootDir + File.separator + "consumequeue_ext";
     }
-
+    
+    //获取存储索引
     public static String getStorePathIndex(final String rootDir) {
         return rootDir + File.separator + "index";
     }
 
+    //获取存储检查点文件
     public static String getStoreCheckpoint(final String rootDir) {
         return rootDir + File.separator + "checkpoint";
     }
 
+    //获取废弃文件
     public static String getAbortFile(final String rootDir) {
         return rootDir + File.separator + "abort";
     }
 
+    /**
+     * 获取锁文件
+     * @param rootDir  根目录
+     * @return     
+     * @return String      
+     * @throws
+     */
     public static String getLockFile(final String rootDir) {
         return rootDir + File.separator + "lock";
     }
-
+    
+    //获取延迟偏移路径
     public static String getDelayOffsetStorePath(final String rootDir) {
         return rootDir + File.separator + "config" + File.separator + "delayOffset.json";
     }

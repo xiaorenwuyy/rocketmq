@@ -20,7 +20,11 @@ package org.apache.rocketmq.broker.plugin;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import org.apache.rocketmq.store.MessageStore;
-
+/**
+ * 消息中心工厂类
+ * @author yuyang
+ * @date 2018年5月30日
+ */
 public final class MessageStoreFactory {
     public final static MessageStore build(MessageStorePluginContext context, MessageStore messageStore)
         throws IOException {
@@ -40,6 +44,7 @@ public final class MessageStoreFactory {
                 }
             }
         }
+        //返回最后一个消息中心
         return messageStore;
     }
 }

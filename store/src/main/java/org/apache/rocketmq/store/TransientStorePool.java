@@ -27,12 +27,19 @@ import org.apache.rocketmq.store.util.LibC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sun.nio.ch.DirectBuffer;
-
+/**
+ * transient 存储工具类
+ * @author yuyang
+ * @date 2018年5月30日
+ */
 public class TransientStorePool {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
 
+    //池大小默认是5
     private final int poolSize;
+    //文件大小 默认是1G
     private final int fileSize;
+    //可用缓冲队列
     private final Deque<ByteBuffer> availableBuffers;
     private final MessageStoreConfig storeConfig;
 
@@ -45,6 +52,7 @@ public class TransientStorePool {
 
     /**
      * It's a heavy init method.
+     * transient 初始化
      */
     public void init() {
         for (int i = 0; i < poolSize; i++) {
@@ -52,7 +60,7 @@ public class TransientStorePool {
 
             final long address = ((DirectBuffer) byteBuffer).address();
             Pointer pointer = new Pointer(address);
-            LibC.INSTANCE.mlock(pointer, new NativeLong(fileSize));
+            LibC.INSTANCE.mlock(pointer, new NativeLong(fileSize));//???
 
             availableBuffers.offer(byteBuffer);
         }
@@ -66,6 +74,7 @@ public class TransientStorePool {
         }
     }
 
+    //??
     public void returnBuffer(ByteBuffer byteBuffer) {
         byteBuffer.position(0);
         byteBuffer.limit(fileSize);

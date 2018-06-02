@@ -20,10 +20,15 @@ package org.apache.rocketmq.broker.longpolling;
 import org.apache.rocketmq.store.MessageArrivingListener;
 
 import java.util.Map;
-
+/**
+ * 通知消息到达监听器
+ * @author yuyang
+ * @date 2018年5月30日
+ */
 public class NotifyMessageArrivingListener implements MessageArrivingListener {
-    private final PullRequestHoldService pullRequestHoldService;
-
+    //pull 请求服务
+	private final PullRequestHoldService pullRequestHoldService;
+    
     public NotifyMessageArrivingListener(final PullRequestHoldService pullRequestHoldService) {
         this.pullRequestHoldService = pullRequestHoldService;
     }

@@ -65,7 +65,11 @@ import org.apache.rocketmq.store.config.BrokerRole;
 import org.apache.rocketmq.store.stats.BrokerStatsManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * pull 消息处理器
+ * @author yuyang
+ * @date 2018年5月30日
+ */
 public class PullMessageProcessor implements NettyRequestProcessor {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.BROKER_LOGGER_NAME);
     private final BrokerController brokerController;
@@ -567,6 +571,12 @@ public class PullMessageProcessor implements NettyRequestProcessor {
         this.brokerController.getPullMessageExecutor().submit(new RequestTask(run, channel, request));
     }
 
+    /**
+     * 注册消费者消息列表
+     * @param sendMessageHookList     发送消费者消息钩子列表
+     * @return void      
+     * @throws
+     */
     public void registerConsumeMessageHook(List<ConsumeMessageHook> sendMessageHookList) {
         this.consumeMessageHookList = sendMessageHookList;
     }

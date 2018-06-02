@@ -28,11 +28,18 @@ import org.apache.rocketmq.common.constant.LoggerName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 存储状态服务
+ * @author yuyang
+ * @date 2018年5月30日
+ */
 public class StoreStatsService extends ServiceThread {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
 
+    //频率抽样时间
     private static final int FREQUENCY_OF_SAMPLING = 1000;
 
+    //最大抽样记录
     private static final int MAX_RECORDS_OF_SAMPLING = 60 * 10;
     private static final String[] PUT_MESSAGE_ENTIRE_TIME_MAX_DESC = new String[] {
         "[<=0ms]", "[0~10ms]", "[10~50ms]", "[50~100ms]", "[100~200ms]", "[200~500ms]", "[500ms~1s]", "[1~2s]", "[2~3s]", "[3~4s]", "[4~5s]", "[5~10s]", "[10s~]",
@@ -42,18 +49,26 @@ public class StoreStatsService extends ServiceThread {
 
     private final AtomicLong putMessageFailedTimes = new AtomicLong(0);
 
+    //put 消息主题次数数量表
     private final Map<String, AtomicLong> putMessageTopicTimesTotal =
         new ConcurrentHashMap<String, AtomicLong>(128);
+    //put 消息主题大小表
     private final Map<String, AtomicLong> putMessageTopicSizeTotal =
         new ConcurrentHashMap<String, AtomicLong>(128);
 
+    //获取消息总时间
     private final AtomicLong getMessageTimesTotalFound = new AtomicLong(0);
-    private final AtomicLong getMessageTransferedMsgCount = new AtomicLong(0);
+    //消息转换总数量
+    private final AtomicLong getMessageTransferedMsgCount = new AtomicLong(0); 
+    //丢失消息总次数
     private final AtomicLong getMessageTimesTotalMiss = new AtomicLong(0);
+    //put 时间列表
     private final LinkedList<CallSnapshot> putTimesList = new LinkedList<CallSnapshot>();
-
+    //查询到的次数列表
     private final LinkedList<CallSnapshot> getTimesFoundList = new LinkedList<CallSnapshot>();
+    //丢失的次数 列表
     private final LinkedList<CallSnapshot> getTimesMissList = new LinkedList<CallSnapshot>();
+    //消息转化列表
     private final LinkedList<CallSnapshot> transferedMsgCountList = new LinkedList<CallSnapshot>();
     private volatile AtomicLong[] putMessageDistributeTime;
     private long messageStoreBootTimestamp = System.currentTimeMillis();
@@ -66,6 +81,7 @@ public class StoreStatsService extends ServiceThread {
 
     private volatile long dispatchMaxBuffer = 0;
 
+    //抽样方法锁
     private ReentrantLock lockSampling = new ReentrantLock();
     private long lastPrintTimestamp = System.currentTimeMillis();
 
@@ -73,6 +89,12 @@ public class StoreStatsService extends ServiceThread {
         this.initPutMessageDistributeTime();
     }
 
+    /**
+     * 初始化put 消息分布式时间  13 长度的数组
+     * @return     
+     * @return AtomicLong[]      
+     * @throws
+     */
     private AtomicLong[] initPutMessageDistributeTime() {
         AtomicLong[] next = new AtomicLong[13];
         for (int i = 0; i < next.length; i++) {
@@ -190,6 +212,7 @@ public class StoreStatsService extends ServiceThread {
         return sb.toString();
     }
 
+    //put 消息时间总和
     public long getPutMessageTimesTotal() {
         long rs = 0;
         for (AtomicLong data : putMessageTopicTimesTotal.values()) {
@@ -443,13 +466,15 @@ public class StoreStatsService extends ServiceThread {
         return result;
     }
 
+    //线程执行
     public void run() {
         log.info(this.getServiceName() + " service started");
-
+        //一直运行
         while (!this.isStopped()) {
             try {
                 this.waitForRunning(FREQUENCY_OF_SAMPLING);
 
+                //抽样
                 this.sampling();
 
                 this.printTps();
@@ -466,26 +491,36 @@ public class StoreStatsService extends ServiceThread {
         return StoreStatsService.class.getSimpleName();
     }
 
+    /**
+     * 抽样
+     *      
+     * @return void      
+     * @throws
+     */
     private void sampling() {
         this.lockSampling.lock();
         try {
+        	//put 次数表
             this.putTimesList.add(new CallSnapshot(System.currentTimeMillis(), getPutMessageTimesTotal()));
             if (this.putTimesList.size() > (MAX_RECORDS_OF_SAMPLING + 1)) {
                 this.putTimesList.removeFirst();
             }
 
+            //查询到的次数列表
             this.getTimesFoundList.add(new CallSnapshot(System.currentTimeMillis(),
                 this.getMessageTimesTotalFound.get()));
             if (this.getTimesFoundList.size() > (MAX_RECORDS_OF_SAMPLING + 1)) {
                 this.getTimesFoundList.removeFirst();
             }
-
+ 
+            //丢失的次数列表
             this.getTimesMissList.add(new CallSnapshot(System.currentTimeMillis(),
                 this.getMessageTimesTotalMiss.get()));
             if (this.getTimesMissList.size() > (MAX_RECORDS_OF_SAMPLING + 1)) {
                 this.getTimesMissList.removeFirst();
             }
-
+            
+            //消息转换列表
             this.transferedMsgCountList.add(new CallSnapshot(System.currentTimeMillis(),
                 this.getMessageTransferedMsgCount.get()));
             if (this.transferedMsgCountList.size() > (MAX_RECORDS_OF_SAMPLING + 1)) {
@@ -567,8 +602,15 @@ public class StoreStatsService extends ServiceThread {
         return putMessageTopicSizeTotal;
     }
 
+    /**
+     * 调用快照
+     * @author yuyang
+     * @date 2018年6月2日
+     */
     static class CallSnapshot {
+    	//时间戳
         public final long timestamp;
+        //调用时间
         public final long callTimesTotal;
 
         public CallSnapshot(long timestamp, long callTimesTotal) {

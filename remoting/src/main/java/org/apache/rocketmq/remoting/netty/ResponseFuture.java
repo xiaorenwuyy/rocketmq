@@ -35,16 +35,27 @@ public class ResponseFuture {
     private final InvokeCallback invokeCallback;
     //开始时间戳
     private final long beginTimestamp = System.currentTimeMillis();
+    //计数器同步类
     private final CountDownLatch countDownLatch = new CountDownLatch(1);
     
     //限流类
     private final SemaphoreReleaseOnlyOnce once;
 
     private final AtomicBoolean executeCallbackOnlyOnce = new AtomicBoolean(false);
+    //响应类
     private volatile RemotingCommand responseCommand;
+    //发送请求成功标志
     private volatile boolean sendRequestOK = true;
+    //异常
     private volatile Throwable cause;
 
+    /**
+     * 构建未来响应
+     * @param opaque 请求识别码
+     * @param timeoutMillis  超时时间
+     * @param invokeCallback 回调
+     * @param once  todo??
+     */
     public ResponseFuture(int opaque, long timeoutMillis, InvokeCallback invokeCallback,
         SemaphoreReleaseOnlyOnce once) {
         this.opaque = opaque;
@@ -75,11 +86,13 @@ public class ResponseFuture {
         return diff > this.timeoutMillis;
     }
 
+    //等待响应
     public RemotingCommand waitResponse(final long timeoutMillis) throws InterruptedException {
         this.countDownLatch.await(timeoutMillis, TimeUnit.MILLISECONDS);
         return this.responseCommand;
     }
 
+    //设置响应
     public void putResponse(final RemotingCommand responseCommand) {
         this.responseCommand = responseCommand;
         this.countDownLatch.countDown();
@@ -105,6 +118,7 @@ public class ResponseFuture {
         return invokeCallback;
     }
 
+    //获取异常
     public Throwable getCause() {
         return cause;
     }

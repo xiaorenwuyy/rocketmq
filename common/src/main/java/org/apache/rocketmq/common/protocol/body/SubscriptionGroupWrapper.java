@@ -22,7 +22,11 @@ import java.util.concurrent.ConcurrentMap;
 import org.apache.rocketmq.common.DataVersion;
 import org.apache.rocketmq.common.subscription.SubscriptionGroupConfig;
 import org.apache.rocketmq.remoting.protocol.RemotingSerializable;
-
+/**
+ * 订阅组包装类
+ * @author yuyang
+ * @date 2018年6月2日
+ */
 public class SubscriptionGroupWrapper extends RemotingSerializable {
     private ConcurrentMap<String, SubscriptionGroupConfig> subscriptionGroupTable =
         new ConcurrentHashMap<String, SubscriptionGroupConfig>(1024);

@@ -32,20 +32,42 @@ import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.rocketmq.remoting.common.RemotingHelper;
-
+/**
+ * io 工具
+ * @author yuyang
+ * @date 2018年6月2日
+ */
 public class IOTinyUtils {
-
+	/**
+	 * 从输入 流读取字符串
+	 * @param input  输入流
+	 * @param encoding  编码
+	 * @return
+	 * @throws IOException     
+	 * @return String      
+	 * @throws
+	 */
     static public String toString(InputStream input, String encoding) throws IOException {
         return (null == encoding) ? toString(new InputStreamReader(input, RemotingHelper.DEFAULT_CHARSET)) : toString(new InputStreamReader(
             input, encoding));
     }
-
+    
+    //从reader 获取字符串
     static public String toString(Reader reader) throws IOException {
         CharArrayWriter sw = new CharArrayWriter();
         copy(reader, sw);
+        //char 去显示字符串
         return sw.toString();
     }
-
+    /**
+     * 重入流到出流
+     * @param input reader
+     * @param output  
+     * @return
+     * @throws IOException     
+     * @return long      
+     * @throws
+     */
     static public long copy(Reader input, Writer output) throws IOException {
         char[] buffer = new char[1 << 12];
         long count = 0;

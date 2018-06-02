@@ -115,7 +115,11 @@ import org.apache.rocketmq.store.MessageFilter;
 import org.apache.rocketmq.store.SelectMappedBufferResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * 管理broker 处理器
+ * @author yuyang
+ * @date 2018年5月30日
+ */
 public class AdminBrokerProcessor implements NettyRequestProcessor {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.BROKER_LOGGER_NAME);
     private final BrokerController brokerController;

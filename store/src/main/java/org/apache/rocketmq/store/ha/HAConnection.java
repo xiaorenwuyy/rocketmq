@@ -27,13 +27,20 @@ import org.apache.rocketmq.remoting.common.RemotingUtil;
 import org.apache.rocketmq.store.SelectMappedBufferResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * HA 连接
+ * @author yuyang
+ * @date 2018年6月3日
+ */
 public class HAConnection {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
     private final HAService haService;
     private final SocketChannel socketChannel;
+    //客户端地址
     private final String clientAddr;
+    //写socket 服务
     private WriteSocketService writeSocketService;
+    //读socket 服务
     private ReadSocketService readSocketService;
 
     private volatile long slaveRequestOffset = -1;

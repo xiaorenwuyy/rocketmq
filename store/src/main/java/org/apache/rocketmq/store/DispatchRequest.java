@@ -17,22 +17,34 @@
 package org.apache.rocketmq.store;
 
 import java.util.Map;
-
+/**
+ * 分发请求
+ * @author yuyang
+ * @date 2018年5月30日
+ */
 public class DispatchRequest {
+	//主题
     private final String topic;
+    //队列id
     private final int queueId;
+    //提交日志 偏移
     private final long commitLogOffset;
     private final int msgSize;
+    //标签编码
     private final long tagsCode;
+    //存储时间戳
     private final long storeTimestamp;
+    //消费队列偏移
     private final long consumeQueueOffset;
     private final String keys;
     private final boolean success;
     private final String uniqKey;
 
+    //系统标志
     private final int sysFlag;
     private final long preparedTransactionOffset;
     private final Map<String, String> propertiesMap;
+    //节点图
     private byte[] bitMap;
 
     public DispatchRequest(

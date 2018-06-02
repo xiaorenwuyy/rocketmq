@@ -21,11 +21,19 @@ import org.apache.rocketmq.common.BrokerConfig;
 import org.apache.rocketmq.store.MessageArrivingListener;
 import org.apache.rocketmq.store.config.MessageStoreConfig;
 import org.apache.rocketmq.store.stats.BrokerStatsManager;
-
+/**
+ * 消息中心插件上下文
+ * @author yuyang
+ * @date 2018年5月30日
+ */
 public class MessageStorePluginContext {
+	//消息中心配置
     private MessageStoreConfig messageStoreConfig;
+    //broker 状态管理器
     private BrokerStatsManager brokerStatsManager;
+    //消息到达监听器
     private MessageArrivingListener messageArrivingListener;
+    //broker 配置类
     private BrokerConfig brokerConfig;
 
     public MessageStorePluginContext(MessageStoreConfig messageStoreConfig,

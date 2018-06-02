@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
  * @date 2018年5月24日
  */
 public class RemotingCommand {
+	//序列化协议
     public static final String SERIALIZE_TYPE_PROPERTY = "rocketmq.serialize.type";
     public static final String SERIALIZE_TYPE_ENV = "ROCKETMQ_SERIALIZE_TYPE";
     /**
@@ -64,6 +65,7 @@ public class RemotingCommand {
     private static final String LONG_CANONICAL_NAME_2 = long.class.getCanonicalName();
     private static final String BOOLEAN_CANONICAL_NAME_1 = Boolean.class.getCanonicalName();
     private static final String BOOLEAN_CANONICAL_NAME_2 = boolean.class.getCanonicalName();
+    //配置 版本
     private static volatile int configVersion = -1;
     //请求识别
     private static AtomicInteger requestId = new AtomicInteger(0);
@@ -104,15 +106,25 @@ public class RemotingCommand {
 
     protected RemotingCommand() {
     }
-
+    
+    /**
+     * 
+     * @param code  请求码
+     * @param customHeader  自定义请求头
+     * @return     
+     * @return RemotingCommand      
+     * @throws
+     */
     public static RemotingCommand createRequestCommand(int code, CommandCustomHeader customHeader) {
         RemotingCommand cmd = new RemotingCommand();
         cmd.setCode(code);
         cmd.customHeader = customHeader;
+        //设置请求版本
         setCmdVersion(cmd);
         return cmd;
     }
 
+    //设置请求版本
     private static void setCmdVersion(RemotingCommand cmd) {
         if (configVersion >= 0) {
             cmd.setVersion(configVersion);

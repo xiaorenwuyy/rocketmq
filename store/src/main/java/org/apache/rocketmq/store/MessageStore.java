@@ -24,6 +24,7 @@ import org.apache.rocketmq.common.message.MessageExtBatch;
 
 /**
  * This class defines contracting interfaces to implement, allowing third-party vendor to use customized message store.
+ * 消息中心接口类
  */
 public interface MessageStore {
 

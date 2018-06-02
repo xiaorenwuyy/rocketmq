@@ -15,7 +15,11 @@
  * limitations under the License.
  */
 package org.apache.rocketmq.remoting.exception;
-
+/**
+ * 发送请求通信异常
+ * @author yuyang
+ * @date 2018年6月2日
+ */
 public class RemotingSendRequestException extends RemotingException {
     private static final long serialVersionUID = 5391285827332471674L;
 

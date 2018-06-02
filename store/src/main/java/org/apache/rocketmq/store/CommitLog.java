@@ -53,9 +53,11 @@ public class CommitLog {
     //映射文件队列
     private final MappedFileQueue mappedFileQueue;
     private final DefaultMessageStore defaultMessageStore;
+    //刷新提交日志服务
     private final FlushCommitLogService flushCommitLogService;
 
     //If TransientStorePool enabled, we must flush message to FileChannel at fixed periods
+    //提交日志服务
     private final FlushCommitLogService commitLogService;
 
     private final AppendMessageCallback appendMessageCallback;
@@ -63,6 +65,7 @@ public class CommitLog {
     private HashMap<String/* topic-queueid */, Long/* offset */> topicQueueTable = new HashMap<String, Long>(1024);
     private volatile long confirmOffset = -1L;
 
+    //锁内时间戳
     private volatile long beginTimeInLock = 0;
     private final PutMessageLock putMessageLock;
 
@@ -103,11 +106,14 @@ public class CommitLog {
         return result;
     }
 
+    //启动
     public void start() {
+    	//提交日志刷新服务
         this.flushCommitLogService.start();
 
         if (defaultMessageStore.getMessageStoreConfig().isTransientStorePoolEnable()) {
-            this.commitLogService.start();
+            //提交日志服务
+        	this.commitLogService.start();
         }
     }
 
@@ -125,6 +131,12 @@ public class CommitLog {
         return this.mappedFileQueue.getFlushedWhere();
     }
 
+    /**
+     * 最大的偏移量
+     * @return     
+     * @return long      
+     * @throws
+     */
     public long getMaxOffset() {
         return this.mappedFileQueue.getMaxOffset();
     }
@@ -876,7 +888,7 @@ public class CommitLog {
 
         log.info("removeQueueFromTopicQueueTable OK Topic: {} QueueId: {}", topic, queueId);
     }
-
+    //自我检查
     public void checkSelf() {
         mappedFileQueue.checkSelf();
     }
@@ -894,13 +906,19 @@ public class CommitLog {
 
         return diff;
     }
-
+    
+    //提交日志服务抽象类
     abstract class FlushCommitLogService extends ServiceThread {
         protected static final int RETRY_TIMES_OVER = 10;
     }
-
+    /**
+     * 提交日志服务
+     * @author yuyang
+     * @date 2018年6月2日
+     */
     class CommitRealTimeService extends FlushCommitLogService {
 
+    	//上次提交时间戳
         private long lastCommitTimestamp = 0;
 
         @Override
@@ -912,10 +930,13 @@ public class CommitLog {
         public void run() {
             CommitLog.log.info(this.getServiceName() + " service started");
             while (!this.isStopped()) {
+            	//时间间隔
                 int interval = CommitLog.this.defaultMessageStore.getMessageStoreConfig().getCommitIntervalCommitLog();
-
+                
+                //页数
                 int commitDataLeastPages = CommitLog.this.defaultMessageStore.getMessageStoreConfig().getCommitCommitLogLeastPages();
 
+                //日志提交通过时间
                 int commitDataThoroughInterval =
                     CommitLog.this.defaultMessageStore.getMessageStoreConfig().getCommitCommitLogThoroughInterval();
 
@@ -931,6 +952,7 @@ public class CommitLog {
                     if (!result) {
                         this.lastCommitTimestamp = end; // result = false means some data committed.
                         //now wake up flush thread.
+                        //??
                         flushCommitLogService.wakeup();
                     }
 
@@ -942,7 +964,7 @@ public class CommitLog {
                     CommitLog.log.error(this.getServiceName() + " service has exception. ", e);
                 }
             }
-
+            //结束后处理
             boolean result = false;
             for (int i = 0; i < RETRY_TIMES_OVER && !result; i++) {
                 result = CommitLog.this.mappedFileQueue.commit(0);
@@ -953,7 +975,7 @@ public class CommitLog {
     }
 
     /**
-     * 异步刷新
+     * 异步刷新 日志
      * @author yuyang
      * @date 2018年5月30日
      */
@@ -961,15 +983,20 @@ public class CommitLog {
         private long lastFlushTimestamp = 0;
         private long printTimes = 0;
 
+        //线程运行
         public void run() {
             CommitLog.log.info(this.getServiceName() + " service started");
 
+            //一直运行
             while (!this.isStopped()) {
+            	//是否需要时间间隔
                 boolean flushCommitLogTimed = CommitLog.this.defaultMessageStore.getMessageStoreConfig().isFlushCommitLogTimed();
 
+                //时间间隔
                 int interval = CommitLog.this.defaultMessageStore.getMessageStoreConfig().getFlushIntervalCommitLog();
                 int flushPhysicQueueLeastPages = CommitLog.this.defaultMessageStore.getMessageStoreConfig().getFlushCommitLogLeastPages();
-
+                
+                //服务队里通过间隔
                 int flushPhysicQueueThoroughInterval =
                     CommitLog.this.defaultMessageStore.getMessageStoreConfig().getFlushCommitLogThoroughInterval();
 
@@ -994,6 +1021,7 @@ public class CommitLog {
                         this.printFlushProgress();
                     }
 
+                    //刷新文件
                     long begin = System.currentTimeMillis();
                     CommitLog.this.mappedFileQueue.flush(flushPhysicQueueLeastPages);
                     long storeTimestamp = CommitLog.this.mappedFileQueue.getStoreTimestamp();
@@ -1011,6 +1039,7 @@ public class CommitLog {
             }
 
             // Normal shutdown, to ensure that all the flush before exit
+            //??
             boolean result = false;
             for (int i = 0; i < RETRY_TIMES_OVER && !result; i++) {
                 result = CommitLog.this.mappedFileQueue.flush(0);

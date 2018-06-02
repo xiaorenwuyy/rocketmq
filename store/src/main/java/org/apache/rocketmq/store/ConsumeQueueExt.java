@@ -35,6 +35,7 @@ import java.util.List;
  * <li>2. And is week reliable.</li>
  * <li>3. Be careful, address returned is always less than 0.</li>
  * <li>4. Pls keep this file small.</li>
+ * 消费者队列扩展类
  */
 public class ConsumeQueueExt {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
@@ -45,6 +46,7 @@ public class ConsumeQueueExt {
 
     private final String storePath;
     private final int mappedFileSize;
+    //临时缓冲区
     private ByteBuffer tempContainer;
 
     public static final int END_BLANK_DATA_LENGTH = 4;
@@ -183,7 +185,7 @@ public class ConsumeQueueExt {
      * <p>
      * Be careful, this method is not thread safe.
      * </p>
-     *
+     * todo comment
      * @return success: < 0: fail: >=0
      */
     public long put(final CqExtUnit cqExtUnit) {
@@ -406,6 +408,7 @@ public class ConsumeQueueExt {
 
     /**
      * Store unit.
+     * 存储单元
      */
     public static class CqExtUnit {
         public static final short MIN_EXT_UNIT_SIZE
@@ -432,10 +435,12 @@ public class ConsumeQueueExt {
         private short size;
         /**
          * has code of tags
+         * 标签编码
          */
         private long tagsCode;
         /**
          * the time to store into commit log of message
+         * 消息中心时间戳
          */
         private long msgStoreTime;
         /**
@@ -444,6 +449,7 @@ public class ConsumeQueueExt {
         private short bitMapSize;
         /**
          * filter bit map
+         * 过滤 字节数组
          */
         private byte[] filterBitMap;
 

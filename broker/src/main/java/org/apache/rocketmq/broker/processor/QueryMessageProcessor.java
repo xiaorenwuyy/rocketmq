@@ -37,7 +37,11 @@ import org.apache.rocketmq.store.QueryMessageResult;
 import org.apache.rocketmq.store.SelectMappedBufferResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * 查询消息处理器
+ * @author yuyang
+ * @date 2018年5月30日
+ */
 public class QueryMessageProcessor implements NettyRequestProcessor {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.BROKER_LOGGER_NAME);
 

@@ -26,9 +26,25 @@ import java.util.Iterator;
 import java.util.List;
 import org.apache.rocketmq.common.MQVersion;
 import org.apache.rocketmq.common.MixAll;
-
+/**
+ * http 通信
+ * @author yuyang
+ * @date 2018年6月2日
+ */
 public class HttpTinyClient {
 
+	/**
+	 * Get 方式获取结果
+	 * @param url  路径
+	 * @param headers  请求头
+	 * @param paramValues 请求参数
+	 * @param encoding 编码
+	 * @param readTimeoutMs  超时时间
+	 * @return
+	 * @throws IOException     
+	 * @return HttpResult      
+	 * @throws
+	 */
     static public HttpResult httpGet(String url, List<String> headers, List<String> paramValues,
         String encoding, long readTimeoutMs) throws IOException {
         String encodedContent = encodingParams(paramValues, encoding);
@@ -40,15 +56,19 @@ public class HttpTinyClient {
             conn.setRequestMethod("GET");
             conn.setConnectTimeout((int) readTimeoutMs);
             conn.setReadTimeout((int) readTimeoutMs);
+            //请求头
             setHeaders(conn, headers, encoding);
 
             conn.connect();
+            //返回码
             int respCode = conn.getResponseCode();
             String resp = null;
 
             if (HttpURLConnection.HTTP_OK == respCode) {
+            	//从输入流中获取字符串
                 resp = IOTinyUtils.toString(conn.getInputStream(), encoding);
             } else {
+            	//从输入错误流中获取字符串
                 resp = IOTinyUtils.toString(conn.getErrorStream(), encoding);
             }
             return new HttpResult(respCode, resp);
@@ -58,7 +78,15 @@ public class HttpTinyClient {
             }
         }
     }
-
+    /**
+     * 获取拼接的字符串Get 方式的
+     * @param paramValues 参数列表
+     * @param encoding  编码
+     * @return
+     * @throws UnsupportedEncodingException     
+     * @return String      
+     * @throws
+     */
     static private String encodingParams(List<String> paramValues, String encoding)
         throws UnsupportedEncodingException {
         StringBuilder sb = new StringBuilder();
@@ -76,8 +104,17 @@ public class HttpTinyClient {
         return sb.toString();
     }
 
+    /**
+     * 设置请求头  添加请求属性
+     * @param conn  url 连接
+     * @param headers  请求头
+     * @param encoding     编码
+     * @return void      
+     * @throws
+     */
     static private void setHeaders(HttpURLConnection conn, List<String> headers, String encoding) {
-        if (null != headers) {
+        //添加自定义的请求头
+    	if (null != headers) {
             for (Iterator<String> iter = headers.iterator(); iter.hasNext(); ) {
                 conn.addRequestProperty(iter.next(), iter.next());
             }
@@ -123,7 +160,7 @@ public class HttpTinyClient {
             }
         }
     }
-
+    //http 通信结果
     static public class HttpResult {
         final public int code;
         final public String content;

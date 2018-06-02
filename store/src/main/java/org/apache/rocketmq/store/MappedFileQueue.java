@@ -44,7 +44,7 @@ public class MappedFileQueue {
 
     //映射文件大小
     private final int mappedFileSize;
-
+    //映射文件列表
     private final CopyOnWriteArrayList<MappedFile> mappedFiles = new CopyOnWriteArrayList<MappedFile>();
 
     //分配映射文件服务
@@ -67,7 +67,8 @@ public class MappedFileQueue {
         this.mappedFileSize = mappedFileSize;
         this.allocateMappedFileService = allocateMappedFileService;
     }
-
+    
+    //自我检查  检查
     public void checkSelf() {
 
         if (!this.mappedFiles.isEmpty()) {
@@ -77,6 +78,7 @@ public class MappedFileQueue {
                 MappedFile cur = iterator.next();
 
                 if (pre != null) {
+                	//检查偏移量之差失败是等于规定的文件大小  不等于则打印
                     if (cur.getFileFromOffset() - pre.getFileFromOffset() != this.mappedFileSize) {
                         LOG_ERROR.error("[BUG]The mappedFile queue's data is damaged, the adjacent mappedFile's offset don't match. pre file {}, cur file {}",
                             pre.getFileName(), cur.getFileName());
@@ -250,6 +252,12 @@ public class MappedFileQueue {
         return getLastMappedFile(startOffset, true);
     }
 
+    /**
+     * 获取最后一个映射文件  最后一个index 的
+     * @return     
+     * @return MappedFile      
+     * @throws
+     */
     public MappedFile getLastMappedFile() {
         MappedFile mappedFileLast = null;
 
@@ -311,7 +319,12 @@ public class MappedFileQueue {
         }
         return -1;
     }
-
+    /**
+     * 从映射文件中获取最大偏移量
+     * @return     
+     * @return long      
+     * @throws
+     */
     public long getMaxOffset() {
         MappedFile mappedFile = getLastMappedFile();
         if (mappedFile != null) {
@@ -435,13 +448,23 @@ public class MappedFileQueue {
         return deleteCount;
     }
 
+    /**
+     * 映射文件刷新
+     * @param flushLeastPages
+     * @return     
+     * @return boolean      
+     * @throws
+     */
     public boolean flush(final int flushLeastPages) {
         boolean result = true;
+        //获取映射文件
         MappedFile mappedFile = this.findMappedFileByOffset(this.flushedWhere, this.flushedWhere == 0);
         if (mappedFile != null) {
             long tmpTimeStamp = mappedFile.getStoreTimestamp();
+            //刷新偏移
             int offset = mappedFile.flush(flushLeastPages);
             long where = mappedFile.getFileFromOffset() + offset;
+            //??
             result = where == this.flushedWhere;
             this.flushedWhere = where;
             if (0 == flushLeastPages) {
@@ -452,6 +475,13 @@ public class MappedFileQueue {
         return result;
     }
 
+    /**
+     * 日志提交
+     * @param commitLeastPages
+     * @return     
+     * @return boolean      
+     * @throws
+     */
     public boolean commit(final int commitLeastPages) {
         boolean result = true;
         MappedFile mappedFile = this.findMappedFileByOffset(this.committedWhere, this.committedWhere == 0);
@@ -468,12 +498,14 @@ public class MappedFileQueue {
     /**
      * Finds a mapped file by offset.
      *
+     * 查找映射文件
      * @param offset Offset.
      * @param returnFirstOnNotFound If the mapped file is not found, then return the first one.
      * @return Mapped file or null (when not found and returnFirstOnNotFound is <code>false</code>).
      */
     public MappedFile findMappedFileByOffset(final long offset, final boolean returnFirstOnNotFound) {
         try {
+        	//获取第一个映射文件
             MappedFile mappedFile = this.getFirstMappedFile();
             if (mappedFile != null) {
                 int index = (int) ((offset / this.mappedFileSize) - (mappedFile.getFileFromOffset() / this.mappedFileSize));
@@ -503,6 +535,12 @@ public class MappedFileQueue {
         return null;
     }
 
+    /**
+     * 获取第一个映射文件
+     * @return     
+     * @return MappedFile      
+     * @throws
+     */
     public MappedFile getFirstMappedFile() {
         MappedFile mappedFileFirst = null;
 

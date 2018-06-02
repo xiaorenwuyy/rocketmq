@@ -61,6 +61,13 @@ public class RemotingUtil {
         return isWindowsPlatform;
     }
 
+    /**
+     * 打开选择器，获取选择器
+     * @return
+     * @throws IOException     
+     * @return Selector      
+     * @throws
+     */
     public static Selector openSelector() throws IOException {
         Selector result = null;
 

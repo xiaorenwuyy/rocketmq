@@ -39,7 +39,11 @@ import org.apache.rocketmq.store.CommitLog;
 import org.apache.rocketmq.store.DefaultMessageStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * Ha 服务
+ * @author yuyang
+ * @date 2018年5月30日
+ */
 public class HAService {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
 
@@ -47,11 +51,13 @@ public class HAService {
 
     private final List<HAConnection> connectionList = new LinkedList<>();
 
+    //接收socket服务
     private final AcceptSocketService acceptSocketService;
 
     private final DefaultMessageStore defaultMessageStore;
 
     private final WaitNotifyObject waitNotifyObject = new WaitNotifyObject();
+    //ha push 从最大偏移量
     private final AtomicLong push2SlaveMaxOffset = new AtomicLong(0);
 
     private final GroupTransferService groupTransferService;
@@ -60,12 +66,19 @@ public class HAService {
 
     public HAService(final DefaultMessageStore defaultMessageStore) throws IOException {
         this.defaultMessageStore = defaultMessageStore;
+        //设置获取socket服务
         this.acceptSocketService =
             new AcceptSocketService(defaultMessageStore.getMessageStoreConfig().getHaListenPort());
         this.groupTransferService = new GroupTransferService();
         this.haClient = new HAClient();
     }
-
+    
+    /**
+     * 更新ha 主地址
+     * @param newAddr     ha主地址
+     * @return void      
+     * @throws
+     */
     public void updateMasterAddress(final String newAddr) {
         if (this.haClient != null) {
             this.haClient.updateMasterAddress(newAddr);
@@ -104,8 +117,9 @@ public class HAService {
     // public void notifyTransferSome() {
     // this.groupTransferService.notifyTransferSome();
     // }
-
+    //启动ha 服务
     public void start() throws Exception {
+    	//socket服务开始接收
         this.acceptSocketService.beginAccept();
         this.acceptSocketService.start();
         this.groupTransferService.start();
@@ -155,8 +169,10 @@ public class HAService {
 
     /**
      * Listens to slave connections to create {@link HAConnection}.
+     * socket 获取服务 
      */
     class AcceptSocketService extends ServiceThread {
+    	//socket 地址
         private final SocketAddress socketAddressListen;
         private ServerSocketChannel serverSocketChannel;
         private Selector selector;
@@ -167,7 +183,7 @@ public class HAService {
 
         /**
          * Starts listening to slave connections.
-         *
+         * Accept 方法设置
          * @throws Exception If fails.
          */
         public void beginAccept() throws Exception {
@@ -249,6 +265,7 @@ public class HAService {
 
     /**
      * GroupTransferService Service
+     * 组流转服务
      */
     class GroupTransferService extends ServiceThread {
 
@@ -323,8 +340,14 @@ public class HAService {
         }
     }
 
+    /**
+     * HA 客户端
+     * @author yuyang
+     * @date 2018年5月30日
+     */
     class HAClient extends ServiceThread {
         private static final int READ_MAX_BUFFER_SIZE = 1024 * 1024 * 4;
+        //主地址
         private final AtomicReference<String> masterAddress = new AtomicReference<>();
         private final ByteBuffer reportOffset = ByteBuffer.allocate(8);
         private SocketChannel socketChannel;
@@ -339,9 +362,16 @@ public class HAService {
         public HAClient() throws IOException {
             this.selector = RemotingUtil.openSelector();
         }
-
+        
+        /**
+         * 更新ha 主地址
+         * @param newAddr      ha 地址
+         * @return void      
+         * @throws
+         */
         public void updateMasterAddress(final String newAddr) {
             String currentAddr = this.masterAddress.get();
+            //主地址为空，或者不等于新地址就把心地址设为主地址
             if (currentAddr == null || !currentAddr.equals(newAddr)) {
                 this.masterAddress.set(newAddr);
                 log.info("update master address, OLD: " + currentAddr + " NEW: " + newAddr);

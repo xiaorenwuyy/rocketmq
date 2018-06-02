@@ -32,7 +32,11 @@ import org.apache.rocketmq.store.DispatchRequest;
 import org.apache.rocketmq.store.config.StorePathConfigHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * 索引服务
+ * @author yuyang
+ * @date 2018年5月30日
+ */
 public class IndexService {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
     /**
@@ -198,6 +202,12 @@ public class IndexService {
         return topic + "#" + key;
     }
 
+    /**
+     * 构建索引
+     * @param req     分发请求   todo comment
+     * @return void      
+     * @throws
+     */
     public void buildIndex(DispatchRequest req) {
         IndexFile indexFile = retryGetAndCreateIndexFile();
         if (indexFile != null) {

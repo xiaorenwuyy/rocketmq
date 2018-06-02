@@ -21,7 +21,11 @@ import com.sun.jna.Native;
 import com.sun.jna.NativeLong;
 import com.sun.jna.Platform;
 import com.sun.jna.Pointer;
-
+/**
+ * c 库
+ * @author yuyang
+ * @date 2018年5月30日
+ */
 public interface LibC extends Library {
     LibC INSTANCE = (LibC) Native.loadLibrary(Platform.isWindows() ? "msvcrt" : "c", LibC.class);
 

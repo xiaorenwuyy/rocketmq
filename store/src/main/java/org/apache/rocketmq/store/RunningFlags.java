@@ -16,18 +16,28 @@
  */
 package org.apache.rocketmq.store;
 
+/**
+ * 运行标志
+ * @author yuyang
+ * @date 2018年5月30日
+ */
 public class RunningFlags {
 
     private static final int NOT_READABLE_BIT = 1;
 
+    //不可写
     private static final int NOT_WRITEABLE_BIT = 1 << 1;
 
+    //写主题错误bit
     private static final int WRITE_LOGICS_QUEUE_ERROR_BIT = 1 << 2;
 
+    //索引文件 bit
     private static final int WRITE_INDEX_FILE_ERROR_BIT = 1 << 3;
 
+    //硬盘已满
     private static final int DISK_FULL_BIT = 1 << 4;
 
+    //标志bit
     private volatile int flagBits = 0;
 
     public RunningFlags() {
@@ -69,6 +79,7 @@ public class RunningFlags {
         return result;
     }
 
+    //是否可写
     public boolean isWriteable() {
         if ((this.flagBits & (NOT_WRITEABLE_BIT | WRITE_LOGICS_QUEUE_ERROR_BIT | DISK_FULL_BIT | WRITE_INDEX_FILE_ERROR_BIT)) == 0) {
             return true;
@@ -93,7 +104,13 @@ public class RunningFlags {
         }
         return result;
     }
-
+    
+    /**
+     * make 主题队列错误
+     *      
+     * @return void      
+     * @throws
+     */
     public void makeLogicsQueueError() {
         this.flagBits |= WRITE_LOGICS_QUEUE_ERROR_BIT;
     }

@@ -36,8 +36,10 @@ public class NettySystemConfig {
 
     public static final boolean NETTY_POOLED_BYTE_BUF_ALLOCATOR_ENABLE = //
         Boolean.parseBoolean(System.getProperty(COM_ROCKETMQ_REMOTING_NETTY_POOLED_BYTE_BUF_ALLOCATOR_ENABLE, "false"));
+    //客户端异步大小
     public static final int CLIENT_ASYNC_SEMAPHORE_VALUE = //
         Integer.parseInt(System.getProperty(COM_ROCKETMQ_REMOTING_CLIENT_ASYNC_SEMAPHORE_VALUE, "65535"));
+    //客户端单项大小
     public static final int CLIENT_ONEWAY_SEMAPHORE_VALUE =
         Integer.parseInt(System.getProperty(COM_ROCKETMQ_REMOTING_CLIENT_ONEWAY_SEMAPHORE_VALUE, "65535"));
     //netty 发送缓存大小 可配置 ,默认65535

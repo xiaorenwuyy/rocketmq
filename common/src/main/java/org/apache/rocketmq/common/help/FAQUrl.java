@@ -15,12 +15,17 @@
  * limitations under the License.
  */
 package org.apache.rocketmq.common.help;
-
+/**
+ * 帮助url
+ * @author yuyang
+ * @date 2018年6月2日
+ */
 public class FAQUrl {
 
     public static final String APPLY_TOPIC_URL =
         "http://rocketmq.apache.org/docs/faq/";
 
+    //问题帮助地址字符串
     public static final String NAME_SERVER_ADDR_NOT_EXIST_URL =
         "http://rocketmq.apache.org/docs/faq/";
 
@@ -57,10 +62,16 @@ public class FAQUrl {
 
     public static final String UNKNOWN_HOST_EXCEPTION =
         "http://rocketmq.apache.org/docs/faq/";
-
+    //字符串前后描述
     private static final String TIP_STRING_BEGIN = "\nSee ";
     private static final String TIP_STRING_END = " for further details.";
-
+    /**
+     * 获取字符串描述
+     * @param url  路径
+     * @return     
+     * @return String      
+     * @throws
+     */
     public static String suggestTodo(final String url) {
         StringBuilder sb = new StringBuilder();
         sb.append(TIP_STRING_BEGIN);

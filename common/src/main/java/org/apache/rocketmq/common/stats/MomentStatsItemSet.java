@@ -25,8 +25,13 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.apache.rocketmq.common.UtilAll;
 import org.slf4j.Logger;
-
+/**
+ * 状态项集合类
+ * @author yuyang
+ * @date 2018年5月31日
+ */
 public class MomentStatsItemSet {
+	//状态表
     private final ConcurrentMap<String/* key */, MomentStatsItem> statsItemTable =
         new ConcurrentHashMap<String, MomentStatsItem>(128);
     private final String statsName;

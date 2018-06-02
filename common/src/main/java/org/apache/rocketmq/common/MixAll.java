@@ -59,6 +59,7 @@ public class MixAll {
     //nameserver 地址
     public static final String NAMESRV_ADDR_PROPERTY = "rocketmq.namesrv.addr";
     public static final String MESSAGE_COMPRESS_LEVEL = "rocketmq.message.compressLevel";
+    //默认的nameserver 地址
     public static final String DEFAULT_NAMESRV_ADDR_LOOKUP = "jmenv.tbsite.net";
     //nameserver domain 名称
     public static final String WS_DOMAIN_NAME = System.getProperty("rocketmq.namesrv.domain", DEFAULT_NAMESRV_ADDR_LOOKUP);
@@ -109,10 +110,12 @@ public class MixAll {
     public static final String DEFAULT_TRACE_REGION_ID = "DefaultRegion";
     public static final String CONSUME_CONTEXT_TYPE = "ConsumeContextType";
 
+    //获取ws 地址
     public static String getWSAddr() {
         String wsDomainName = System.getProperty("rocketmq.namesrv.domain", DEFAULT_NAMESRV_ADDR_LOOKUP);
         String wsDomainSubgroup = System.getProperty("rocketmq.namesrv.domain.subgroup", "nsaddr");
         String wsAddr = "http://" + wsDomainName + ":8080/rocketmq/" + wsDomainSubgroup;
+        //如果有冒号则说明有端口了，所以拼接路径上就不再加端口了
         if (wsDomainName.indexOf(":") > 0) {
             wsAddr = "http://" + wsDomainName + "/rocketmq/" + wsDomainSubgroup;
         }
@@ -134,10 +137,19 @@ public class MixAll {
     public static String getDLQTopic(final String consumerGroup) {
         return DLQ_GROUP_TOPIC_PREFIX + consumerGroup;
     }
-
+    
+    /**
+     * 获取渠道地址，就是地址
+     * @param isChange  todo
+     * @param brokerAddr  broker 地址
+     * @return     
+     * @return String      
+     * @throws
+     */
     public static String brokerVIPChannel(final boolean isChange, final String brokerAddr) {
         if (isChange) {
             String[] ipAndPort = brokerAddr.split(":");
+            //设置新端口
             String brokerAddrNew = ipAndPort[0] + ":" + (Integer.parseInt(ipAndPort[1]) - 2);
             return brokerAddrNew;
         } else {
@@ -176,6 +188,14 @@ public class MixAll {
         file.renameTo(new File(fileName));
     }
 
+    /**
+     * 把字符串写入文件
+     * @param str  需要写入的字符串
+     * @param fileName  文件名
+     * @throws IOException     
+     * @return void      
+     * @throws
+     */
     public static void string2FileNotSafe(final String str, final String fileName) throws IOException {
         File file = new File(fileName);
         File fileParent = file.getParentFile();

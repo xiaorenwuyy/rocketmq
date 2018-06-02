@@ -30,6 +30,7 @@ import java.util.Iterator;
 
 /**
  * Calculate bit map of filter.
+ * 计算 bit 的提交日志类
  */
 public class CommitLogDispatcherCalcBitMap implements CommitLogDispatcher {
 

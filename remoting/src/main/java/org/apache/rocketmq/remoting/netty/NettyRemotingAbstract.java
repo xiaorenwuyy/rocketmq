@@ -378,34 +378,61 @@ public abstract class NettyRemotingAbstract {
         }
     }
 
+    /**
+     * 远程同步调用
+     * @param channel  渠道
+     * @param request  请求命令
+     * @param timeoutMillis  超时时间
+     * @return
+     * @throws InterruptedException
+     * @throws RemotingSendRequestException
+     * @throws RemotingTimeoutException     
+     * @return RemotingCommand      
+     * @throws
+     */
     public RemotingCommand invokeSyncImpl(final Channel channel, final RemotingCommand request,
         final long timeoutMillis)
         throws InterruptedException, RemotingSendRequestException, RemotingTimeoutException {
-        final int opaque = request.getOpaque();
+        //请求识别码
+    	final int opaque = request.getOpaque();
 
         try {
+        	//构建未来响应
             final ResponseFuture responseFuture = new ResponseFuture(opaque, timeoutMillis, null, null);
+            //在未来响应表中设置，新的未来响应
             this.responseTable.put(opaque, responseFuture);
             final SocketAddress addr = channel.remoteAddress();
+            
             channel.writeAndFlush(request).addListener(new ChannelFutureListener() {
-                @Override
+                //操作完成监听类
+            	@Override
                 public void operationComplete(ChannelFuture f) throws Exception {
                     if (f.isSuccess()) {
+                    	//响应成功则返回
                         responseFuture.setSendRequestOK(true);
                         return;
                     } else {
                         responseFuture.setSendRequestOK(false);
                     }
-
+                    //影响失败 则继续执行
+                    
+                    //响应表去除数据	
                     responseTable.remove(opaque);
+                    //设置异常信息 从ChannelFuture 获取
                     responseFuture.setCause(f.cause());
+                    //设置响应
                     responseFuture.putResponse(null);
                     log.warn("send a request command to channel <" + addr + "> failed.");
                 }
             });
+            
+            //responseCommand  是什么时候设置进去的？？？
 
+            //等待响应
             RemotingCommand responseCommand = responseFuture.waitResponse(timeoutMillis);
+            //响应命令有超时等信息
             if (null == responseCommand) {
+            	//响应命令为空，但是返回正常，则是超时
                 if (responseFuture.isSendRequestOK()) {
                     throw new RemotingTimeoutException(RemotingHelper.parseSocketAddressAddr(addr), timeoutMillis,
                         responseFuture.getCause());

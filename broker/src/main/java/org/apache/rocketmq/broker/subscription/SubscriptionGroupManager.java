@@ -30,7 +30,11 @@ import org.apache.rocketmq.common.subscription.SubscriptionGroupConfig;
 import org.apache.rocketmq.remoting.protocol.RemotingSerializable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * 订阅组管理
+ * @author yuyang
+ * @date 2018年5月31日
+ */
 public class SubscriptionGroupManager extends ConfigManager {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.BROKER_LOGGER_NAME);
 
@@ -123,10 +127,17 @@ public class SubscriptionGroupManager extends ConfigManager {
         this.persist();
     }
 
+    /**
+     * 禁用消费者处理
+     * @param groupName     
+     * @return void      
+     * @throws
+     */
     public void disableConsume(final String groupName) {
         SubscriptionGroupConfig old = this.subscriptionGroupTable.get(groupName);
-        if (old != null) {
+        if (old != null) {//如果有老的，则设置是否支持消费者为否
             old.setConsumeEnable(false);
+            //更新下一版本
             this.dataVersion.nextVersion();
         }
     }

@@ -15,8 +15,13 @@
  * limitations under the License.
  */
 package org.apache.rocketmq.common;
-
+/**
+ * 系统钟表
+ * @author yuyang
+ * @date 2018年5月30日
+ */
 public class SystemClock {
+	//获取当前日期 long 型
     public long now() {
         return System.currentTimeMillis();
     }

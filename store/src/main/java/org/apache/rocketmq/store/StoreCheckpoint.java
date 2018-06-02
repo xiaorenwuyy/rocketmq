@@ -26,7 +26,11 @@ import org.apache.rocketmq.common.UtilAll;
 import org.apache.rocketmq.common.constant.LoggerName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * 存储中心检查点
+ * @author yuyang
+ * @date 2018年6月2日
+ */
 public class StoreCheckpoint {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
     private final RandomAccessFile randomAccessFile;
@@ -36,6 +40,11 @@ public class StoreCheckpoint {
     private volatile long logicsMsgTimestamp = 0;
     private volatile long indexMsgTimestamp = 0;
 
+    /**
+     * 构建存储检查点
+     * @param scpPath 配置文件路径
+     * @throws IOException
+     */
     public StoreCheckpoint(final String scpPath) throws IOException {
         File file = new File(scpPath);
         MappedFile.ensureDirOK(file.getParent());
@@ -43,12 +52,16 @@ public class StoreCheckpoint {
 
         this.randomAccessFile = new RandomAccessFile(file, "rw");
         this.fileChannel = this.randomAccessFile.getChannel();
+        //？？
         this.mappedByteBuffer = fileChannel.map(MapMode.READ_WRITE, 0, MappedFile.OS_PAGE_SIZE);
 
         if (fileExists) {
             log.info("store checkpoint file exists, " + scpPath);
+            //物理消息时间戳
             this.physicMsgTimestamp = this.mappedByteBuffer.getLong(0);
+            //逻辑消息时间戳
             this.logicsMsgTimestamp = this.mappedByteBuffer.getLong(8);
+            //索引消息时间戳
             this.indexMsgTimestamp = this.mappedByteBuffer.getLong(16);
 
             log.info("store checkpoint file physicMsgTimestamp " + this.physicMsgTimestamp + ", "
@@ -75,6 +88,7 @@ public class StoreCheckpoint {
         }
     }
 
+    //检查点刷新
     public void flush() {
         this.mappedByteBuffer.putLong(0, this.physicMsgTimestamp);
         this.mappedByteBuffer.putLong(8, this.logicsMsgTimestamp);

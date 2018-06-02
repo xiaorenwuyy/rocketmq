@@ -312,6 +312,12 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
         this.rpcHook = rpcHook;
     }
 
+    /**
+     * 注册消息处理器
+     * requestCode  请求码
+     * processor  netty 请求处理器
+     * executor  执行器
+     */
     @Override
     public void registerProcessor(int requestCode, NettyRequestProcessor processor, ExecutorService executor) {
         ExecutorService executorThis = executor;

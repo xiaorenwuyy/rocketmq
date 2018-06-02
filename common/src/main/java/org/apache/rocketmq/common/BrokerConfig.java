@@ -66,26 +66,35 @@ public class BrokerConfig {
     private boolean brokerTopicEnable = true;
     @ImportantField
     private boolean autoCreateSubscriptionGroup = true;
+    //消息中心插件
     private String messageStorePlugIn = "";
 
     /**
      * thread numbers for send message thread pool, since spin lock will be used by default since 4.0.x, the default
      * value is 1.
+     * 发送消息线程池数量
      */
     private int sendMessageThreadPoolNums = 1; //16 + Runtime.getRuntime().availableProcessors() * 4;
+    //pull 消息线程池数量
     private int pullMessageThreadPoolNums = 16 + Runtime.getRuntime().availableProcessors() * 2;
+    //查询 消息池数量
     private int queryMessageThreadPoolNums = 8 + Runtime.getRuntime().availableProcessors();
 
+    //管理broker 线程池数量
     private int adminBrokerThreadPoolNums = 16;
+    //客户端管理线程池数量
     private int clientManageThreadPoolNums = 32;
+    //消费者管理线程池数量
     private int consumerManageThreadPoolNums = 32;
 
+    //刷新消费者偏移间隔  5秒
     private int flushConsumerOffsetInterval = 1000 * 5;
 
     private int flushConsumerOffsetHistoryInterval = 1000 * 60;
 
     @ImportantField
     private boolean rejectTransactionMessage = false;
+    //是否支持通过地址服务器获取nameserver
     @ImportantField
     private boolean fetchNamesrvAddrByAddressServer = false;
     //发送队列空间数
@@ -123,7 +132,9 @@ public class BrokerConfig {
 
     private boolean slaveReadEnable = false;
 
+    //如果消费者读的慢是否要禁止消费者
     private boolean disableConsumeIfConsumerReadSlowly = false;
+    //消费者？？？  16G
     private long consumerFallbehindThreshold = 1024L * 1024 * 1024 * 16;
 
     private boolean brokerFastFailureEnable = true;
@@ -149,6 +160,7 @@ public class BrokerConfig {
     private int maxErrorRateOfBloomFilter = 20;
 
     //how long to clean filter data after dead.Default: 24h
+    //清除过滤数据时间
     private long filterDataCleanTimeSpan = 24 * 3600 * 1000;
 
     // whether do filter when retry.

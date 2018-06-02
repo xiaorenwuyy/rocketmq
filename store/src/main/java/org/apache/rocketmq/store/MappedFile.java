@@ -40,29 +40,43 @@ import org.apache.rocketmq.store.util.LibC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sun.nio.ch.DirectBuffer;
-
+/**
+ * 映射文件
+ * @author yuyang
+ * @date 2018年5月30日
+ */
 public class MappedFile extends ReferenceResource {
+	//操作系统默认的页数大小
     public static final int OS_PAGE_SIZE = 1024 * 4;
     protected static final Logger log = LoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
 
+    //原子类  映射虚拟内存
     private static final AtomicLong TOTAL_MAPPED_VIRTUAL_MEMORY = new AtomicLong(0);
 
+    //原子类 映射文件数量
     private static final AtomicInteger TOTAL_MAPPED_FILES = new AtomicInteger(0);
+    //写pos
     protected final AtomicInteger wrotePosition = new AtomicInteger(0);
     //ADD BY ChenYang
+    //提交点
     protected final AtomicInteger committedPosition = new AtomicInteger(0);
+    //刷新点
     private final AtomicInteger flushedPosition = new AtomicInteger(0);
     protected int fileSize;
     protected FileChannel fileChannel;
     /**
      * Message will put to here first, and then reput to FileChannel if writeBuffer is not null.
+     * 写缓存
      */
     protected ByteBuffer writeBuffer = null;
     protected TransientStorePool transientStorePool = null;
     private String fileName;
+    //文件来源偏移量
     private long fileFromOffset;
     private File file;
+    //映射文件缓冲区
     private MappedByteBuffer mappedByteBuffer;
+    //存储的时间戳
     private volatile long storeTimestamp = 0;
     private boolean firstCreateInQueue = false;
 
@@ -78,19 +92,31 @@ public class MappedFile extends ReferenceResource {
         init(fileName, fileSize, transientStorePool);
     }
 
+    /**
+     * 创建父文件
+     * @param dirName   目录名  
+     * @return void      
+     * @throws
+     */
     public static void ensureDirOK(final String dirName) {
         if (dirName != null) {
             File f = new File(dirName);
             if (!f.exists()) {
-                boolean result = f.mkdirs();
+                boolean result = f.mkdirs();//result 结果
                 log.info(dirName + " mkdir " + (result ? "OK" : "Failed"));
             }
         }
     }
-
+    /**
+     * 清除缓冲区
+     * @param buffer    缓冲区 
+     * @return void      
+     * @throws
+     */
     public static void clean(final ByteBuffer buffer) {
         if (buffer == null || !buffer.isDirect() || buffer.capacity() == 0)
             return;
+        //???
         invoke(invoke(viewed(buffer), "cleaner"), "clean");
     }
 
@@ -268,15 +294,19 @@ public class MappedFile extends ReferenceResource {
     }
 
     /**
+     * 刷新页数
      * @return The current flushed position
      */
     public int flush(final int flushLeastPages) {
+    	//支持刷新，继续操作
         if (this.isAbleToFlush(flushLeastPages)) {
             if (this.hold()) {
+            	//获取读取点
                 int value = getReadPosition();
 
                 try {
                     //We only append data to fileChannel or mappedByteBuffer, never both.
+                	//??
                     if (writeBuffer != null || this.fileChannel.position() != 0) {
                         this.fileChannel.force(false);
                     } else {
@@ -285,7 +315,7 @@ public class MappedFile extends ReferenceResource {
                 } catch (Throwable e) {
                     log.error("Error occurred when force data to disk.", e);
                 }
-
+                //设置刷新点
                 this.flushedPosition.set(value);
                 this.release();
             } else {
@@ -296,6 +326,13 @@ public class MappedFile extends ReferenceResource {
         return this.getFlushedPosition();
     }
 
+    /**
+     * 日志提交
+     * @param commitLeastPages
+     * @return     
+     * @return int      
+     * @throws
+     */
     public int commit(final int commitLeastPages) {
         if (writeBuffer == null) {
             //no need to commit data to file channel, so just regard wrotePosition as committedPosition.
@@ -303,7 +340,9 @@ public class MappedFile extends ReferenceResource {
         }
         if (this.isAbleToCommit(commitLeastPages)) {
             if (this.hold()) {
+            	//提交
                 commit0(commitLeastPages);
+                //释放
                 this.release();
             } else {
                 log.warn("in commit, hold failed, commit offset = " + this.committedPosition.get());
@@ -311,6 +350,7 @@ public class MappedFile extends ReferenceResource {
         }
 
         // All dirty data has been committed to FileChannel.
+        //??
         if (writeBuffer != null && this.transientStorePool != null && this.fileSize == this.committedPosition.get()) {
             this.transientStorePool.returnBuffer(writeBuffer);
             this.writeBuffer = null;
@@ -319,6 +359,7 @@ public class MappedFile extends ReferenceResource {
         return this.committedPosition.get();
     }
 
+    //提交
     protected void commit0(final int commitLeastPages) {
         int writePos = this.wrotePosition.get();
         int lastCommittedPosition = this.committedPosition.get();
@@ -337,6 +378,7 @@ public class MappedFile extends ReferenceResource {
         }
     }
 
+    //是否支持刷新
     private boolean isAbleToFlush(final int flushLeastPages) {
         int flush = this.flushedPosition.get();
         int write = getReadPosition();
@@ -344,7 +386,8 @@ public class MappedFile extends ReferenceResource {
         if (this.isFull()) {
             return true;
         }
-
+        
+        //??
         if (flushLeastPages > 0) {
             return ((write / OS_PAGE_SIZE) - (flush / OS_PAGE_SIZE)) >= flushLeastPages;
         }
@@ -352,6 +395,13 @@ public class MappedFile extends ReferenceResource {
         return write > flush;
     }
 
+    /**
+     * 是否支持提交
+     * @param commitLeastPages
+     * @return     
+     * @return boolean      
+     * @throws
+     */
     protected boolean isAbleToCommit(final int commitLeastPages) {
         int flush = this.committedPosition.get();
         int write = this.wrotePosition.get();
@@ -375,6 +425,7 @@ public class MappedFile extends ReferenceResource {
         this.flushedPosition.set(pos);
     }
 
+    //是否写满了
     public boolean isFull() {
         return this.fileSize == this.wrotePosition.get();
     }
@@ -416,7 +467,7 @@ public class MappedFile extends ReferenceResource {
 
         return null;
     }
-
+    //清除引用
     @Override
     public boolean cleanup(final long currentRef) {
         if (this.isAvailable()) {
@@ -475,8 +526,10 @@ public class MappedFile extends ReferenceResource {
 
     /**
      * @return The max position which have valid data
+     * 获取文件读取点
      */
     public int getReadPosition() {
+    	//写缓存如果为空，获取写点不为空则获取  提交点
         return this.writeBuffer == null ? this.wrotePosition.get() : this.committedPosition.get();
     }
 

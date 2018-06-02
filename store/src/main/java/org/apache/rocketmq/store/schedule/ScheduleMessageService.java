@@ -43,17 +43,26 @@ import org.apache.rocketmq.store.config.StorePathConfigHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 定时 消息服务
+ * @author yuyang
+ * @date 2018年5月30日
+ */
 public class ScheduleMessageService extends ConfigManager {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
 
+    //定时主题
     public static final String SCHEDULE_TOPIC = "SCHEDULE_TOPIC_XXXX";
+    //第一个延迟时间
     private static final long FIRST_DELAY_TIME = 1000L;
     private static final long DELAY_FOR_A_WHILE = 100L;
     private static final long DELAY_FOR_A_PERIOD = 10000L;
 
+    //延迟级别表
     private final ConcurrentMap<Integer /* level */, Long/* delay timeMillis */> delayLevelTable =
         new ConcurrentHashMap<Integer, Long>(32);
 
+    //偏移表
     private final ConcurrentMap<Integer /* level */, Long/* offset */> offsetTable =
         new ConcurrentHashMap<Integer, Long>(32);
 
@@ -61,6 +70,7 @@ public class ScheduleMessageService extends ConfigManager {
 
     private final DefaultMessageStore defaultMessageStore;
 
+    //最大延迟级别
     private int maxDelayLevel;
 
     public ScheduleMessageService(final DefaultMessageStore defaultMessageStore) {
@@ -71,6 +81,7 @@ public class ScheduleMessageService extends ConfigManager {
         return queueId + 1;
     }
 
+    //从延迟级别获取队列id
     public static int delayLevel2QueueId(final int delayLevel) {
         return delayLevel - 1;
     }
@@ -100,17 +111,20 @@ public class ScheduleMessageService extends ConfigManager {
 
         return storeTimestamp + 1000;
     }
-
+    
+    //服务启动
     public void start() {
 
         for (Map.Entry<Integer, Long> entry : this.delayLevelTable.entrySet()) {
             Integer level = entry.getKey();
             Long timeDelay = entry.getValue();
+            //获得偏移
             Long offset = this.offsetTable.get(level);
             if (null == offset) {
                 offset = 0L;
             }
-
+            
+            //定时任务启动
             if (timeDelay != null) {
                 this.timer.schedule(new DeliverDelayedMessageTimerTask(level, offset), FIRST_DELAY_TIME);
             }
@@ -141,8 +155,10 @@ public class ScheduleMessageService extends ConfigManager {
         return this.encode(false);
     }
 
+    //文件载入
     public boolean load() {
         boolean result = super.load();
+        //解析延迟水平
         result = result && this.parseDelayLevel();
         return result;
     }
@@ -153,6 +169,7 @@ public class ScheduleMessageService extends ConfigManager {
             .getStorePathRootDir());
     }
 
+    //解码 偏移表添加
     @Override
     public void decode(String jsonString) {
         if (jsonString != null) {
@@ -170,6 +187,7 @@ public class ScheduleMessageService extends ConfigManager {
         return delayOffsetSerializeWrapper.toJson(prettyFormat);
     }
 
+    //解析延迟级别
     public boolean parseDelayLevel() {
         HashMap<String, Long> timeUnitTable = new HashMap<String, Long>();
         timeUnitTable.put("s", 1000L);
@@ -177,6 +195,7 @@ public class ScheduleMessageService extends ConfigManager {
         timeUnitTable.put("h", 1000L * 60 * 60);
         timeUnitTable.put("d", 1000L * 60 * 60 * 24);
 
+        //获取消息延迟级别
         String levelString = this.defaultMessageStore.getMessageStoreConfig().getMessageDelayLevel();
         try {
             String[] levelArray = levelString.split(" ");
@@ -184,13 +203,15 @@ public class ScheduleMessageService extends ConfigManager {
                 String value = levelArray[i];
                 String ch = value.substring(value.length() - 1);
                 Long tu = timeUnitTable.get(ch);
-
+                
+                //最大延迟级别
                 int level = i + 1;
                 if (level > this.maxDelayLevel) {
                     this.maxDelayLevel = level;
                 }
                 long num = Long.parseLong(value.substring(0, value.length() - 1));
                 long delayTimeMillis = tu * num;
+                //添加进入延迟级别表  key 为级别
                 this.delayLevelTable.put(level, delayTimeMillis);
             }
         } catch (Exception e) {
@@ -202,8 +223,15 @@ public class ScheduleMessageService extends ConfigManager {
         return true;
     }
 
+    /**
+     * 提交延迟消息任务
+     * @author yuyang
+     * @date 2018年6月2日
+     */
     class DeliverDelayedMessageTimerTask extends TimerTask {
+    	//延迟级别
         private final int delayLevel;
+        //偏移量
         private final long offset;
 
         public DeliverDelayedMessageTimerTask(int delayLevel, long offset) {
@@ -211,6 +239,7 @@ public class ScheduleMessageService extends ConfigManager {
             this.offset = offset;
         }
 
+        //定时执行
         @Override
         public void run() {
             try {
@@ -237,8 +266,10 @@ public class ScheduleMessageService extends ConfigManager {
 
             return result;
         }
-
+        
+        //执行  todo
         public void executeOnTimeup() {
+        	//获取消费者队列
             ConsumeQueue cq =
                 ScheduleMessageService.this.defaultMessageStore.findConsumeQueue(SCHEDULE_TOPIC,
                     delayLevel2QueueId(delayLevel));

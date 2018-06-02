@@ -84,6 +84,12 @@ public abstract class ConfigManager {
 
     public abstract void decode(final String jsonString);
 
+    /**
+     * 保存数据到文件
+     *      
+     * @return void      
+     * @throws
+     */
     public synchronized void persist() {
         String jsonString = this.encode(true);
         if (jsonString != null) {

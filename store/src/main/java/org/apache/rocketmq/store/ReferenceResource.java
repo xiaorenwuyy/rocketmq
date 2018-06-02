@@ -17,25 +17,33 @@
 package org.apache.rocketmq.store;
 
 import java.util.concurrent.atomic.AtomicLong;
-
+/**
+ * 引用资源
+ * @author yuyang
+ * @date 2018年5月30日
+ */
 public abstract class ReferenceResource {
+	//引用次数
     protected final AtomicLong refCount = new AtomicLong(1);
+    //是否可以获取
     protected volatile boolean available = true;
     protected volatile boolean cleanupOver = false;
     private volatile long firstShutdownTimestamp = 0;
-
+    //是否持有
     public synchronized boolean hold() {
         if (this.isAvailable()) {
             if (this.refCount.getAndIncrement() > 0) {
                 return true;
             } else {
+            	//减去
                 this.refCount.getAndDecrement();
             }
         }
 
         return false;
     }
-
+    
+    //是否可获取
     public boolean isAvailable() {
         return this.available;
     }
@@ -53,11 +61,13 @@ public abstract class ReferenceResource {
         }
     }
 
+    //释放  有refCount 引用次数
     public void release() {
         long value = this.refCount.decrementAndGet();
         if (value > 0)
             return;
 
+        //如果value 小于等于0，清除
         synchronized (this) {
 
             this.cleanupOver = this.cleanup(value);

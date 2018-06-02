@@ -36,6 +36,7 @@ import java.nio.channels.SocketChannel;
  */
 public class RemotingHelper {
     public static final String ROCKETMQ_REMOTING = "RocketmqRemoting";
+    //默认格式
     public static final String DEFAULT_CHARSET = "UTF-8";
 
     private static final Logger log = LoggerFactory.getLogger(ROCKETMQ_REMOTING);
@@ -63,8 +64,16 @@ public class RemotingHelper {
         return sb.toString();
     }
 
+    /**
+     * 从字符串中 获取socket地址
+     * @param addr 字符串地址
+     * @return     
+     * @return SocketAddress      socket 的地址
+     * @throws
+     */
     public static SocketAddress string2SocketAddress(final String addr) {
         String[] s = addr.split(":");
+        //一个 ip 一个port
         InetSocketAddress isa = new InetSocketAddress(s[0], Integer.parseInt(s[1]));
         return isa;
     }
@@ -187,6 +196,13 @@ public class RemotingHelper {
         return "";
     }
 
+    /**
+     * 从socket地址中获取地址信息 ，没有则返回空
+     * @param socketAddress socket地址
+     * @return     
+     * @return String      
+     * @throws
+     */
     public static String parseSocketAddressAddr(SocketAddress socketAddress) {
         if (socketAddress != null) {
             final String addr = socketAddress.toString();

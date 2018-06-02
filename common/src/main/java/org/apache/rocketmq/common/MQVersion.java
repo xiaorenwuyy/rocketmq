@@ -25,7 +25,14 @@ public class MQVersion {
 	 * 当前mq 版本 ，用的是v-4.2.0  的顺序
 	 */
     public static final int CURRENT_VERSION = Version.V4_2_0_SNAPSHOT.ordinal();
-
+    
+    /**
+     * 获取版本描述数量
+     * @param value  
+     * @return     
+     * @return String      
+     * @throws
+     */
     public static String getVersionDesc(int value) {
         int length = Version.values().length;
         if (value >= length) {

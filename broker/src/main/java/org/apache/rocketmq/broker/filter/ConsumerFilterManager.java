@@ -293,6 +293,7 @@ public class ConsumerFilterManager extends ConfigManager {
         return RemotingSerializable.toJson(this, prettyFormat);
     }
 
+    //清理过期数据
     public void clean() {
         Iterator<Map.Entry<String, FilterDataMapByTopic>> topicIterator = this.filterDataByTopic.entrySet().iterator();
         while (topicIterator.hasNext()) {
@@ -305,12 +306,14 @@ public class ConsumerFilterManager extends ConfigManager {
                 Map.Entry<String, ConsumerFilterData> filterDataByGroup = filterDataIterator.next();
 
                 ConsumerFilterData filterData = filterDataByGroup.getValue();
+                //过滤数据如果已经超时一天则删除
                 if (filterData.howLongAfterDeath() >= (this.brokerController == null ? MS_24_HOUR : this.brokerController.getBrokerConfig().getFilterDataCleanTimeSpan())) {
                     log.info("Remove filter consumer {}, died too long!", filterDataByGroup.getValue());
                     filterDataIterator.remove();
                 }
             }
 
+            //如果数据为空则删除topic 的key
             if (filterDataMapByTopic.getValue().getGroupFilterData().isEmpty()) {
                 log.info("Topic has no consumer, remove it! {}", filterDataMapByTopic.getKey());
                 topicIterator.remove();

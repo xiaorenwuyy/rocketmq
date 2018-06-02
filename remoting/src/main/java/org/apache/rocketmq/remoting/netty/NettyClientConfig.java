@@ -23,23 +23,33 @@ package org.apache.rocketmq.remoting.netty;
 public class NettyClientConfig {
     /**
      * Worker thread number
+     * netty 工作线程
      */
     private int clientWorkerThreads = 4;
+    //客户端回调线程数
     private int clientCallbackExecutorThreads = Runtime.getRuntime().availableProcessors();
+    //客户端单项大小
     private int clientOnewaySemaphoreValue = NettySystemConfig.CLIENT_ONEWAY_SEMAPHORE_VALUE;
+    //客户端异步大小
     private int clientAsyncSemaphoreValue = NettySystemConfig.CLIENT_ASYNC_SEMAPHORE_VALUE;
+    //连接超时时间
     private int connectTimeoutMillis = 3000;
     private long channelNotActiveInterval = 1000 * 60;
 
     /**
      * IdleStateEvent will be triggered when neither read nor write was performed for
      * the specified period of this time. Specify {@code 0} to disable
+     * 客户端最大空转事件
+     * 
      */
     private int clientChannelMaxIdleTimeSeconds = 120;
 
+    //客户端发送缓冲区大小
     private int clientSocketSndBufSize = NettySystemConfig.socketSndbufSize;
+    //客户端接收缓冲区大小
     private int clientSocketRcvBufSize = NettySystemConfig.socketRcvbufSize;
     private boolean clientPooledByteBufAllocatorEnable = false;
+    //如果超时是否关闭socket
     private boolean clientCloseSocketIfTimeout = false;
 
     //是否用tls 

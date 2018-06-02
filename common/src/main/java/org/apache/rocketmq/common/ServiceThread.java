@@ -21,15 +21,22 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.rocketmq.common.constant.LoggerName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * 服务线程抽象类
+ * @author yuyang
+ * @date 2018年5月30日
+ */
 public abstract class ServiceThread implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.COMMON_LOGGER_NAME);
 
     private static final long JOIN_TIME = 90 * 1000;
 
     protected final Thread thread;
+    //等待计数器
     protected final CountDownLatch2 waitPoint = new CountDownLatch2(1);
+    //原子类，是否已经通知 默认为false
     protected volatile AtomicBoolean hasNotified = new AtomicBoolean(false);
+    //线程停止标志 用的  volatile 关键字
     protected volatile boolean stopped = false;
 
     public ServiceThread() {
@@ -38,6 +45,7 @@ public abstract class ServiceThread implements Runnable {
 
     public abstract String getServiceName();
 
+    //启动内部的线程
     public void start() {
         this.thread.start();
     }
@@ -97,12 +105,19 @@ public abstract class ServiceThread implements Runnable {
         log.info("makestop thread " + this.getServiceName());
     }
 
+    //唤醒
     public void wakeup() {
         if (hasNotified.compareAndSet(false, true)) {
             waitPoint.countDown(); // notify
         }
     }
-
+    
+    /**
+     * 等待执行  ？？？
+     * @param interval  时间间隔
+     * @return void      
+     * @throws
+     */
     protected void waitForRunning(long interval) {
         if (hasNotified.compareAndSet(true, false)) {
             this.onWaitEnd();

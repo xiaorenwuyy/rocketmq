@@ -46,9 +46,14 @@ import org.apache.rocketmq.remoting.netty.NettyRemotingClient;
 import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * broker 外发api 类
+ * @author yuyang
+ * @date 2018年5月31日
+ */
 public class BrokerOuterAPI {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.BROKER_LOGGER_NAME);
+    //远程客户端
     private final RemotingClient remotingClient;
     private final TopAddressing topAddressing = new TopAddressing(MixAll.getWSAddr());
     private String nameSrvAddr = null;
@@ -62,6 +67,7 @@ public class BrokerOuterAPI {
         this.remotingClient.registerRPCHook(rpcHook);
     }
 
+    //api 启动调用netty 客户端服务
     public void start() {
         this.remotingClient.start();
     }
@@ -70,10 +76,13 @@ public class BrokerOuterAPI {
         this.remotingClient.shutdown();
     }
 
+    //获取nameserver 地址
     public String fetchNameServerAddr() {
         try {
+        	//获取地址
             String addrs = this.topAddressing.fetchNSAddr();
             if (addrs != null) {
+            	//不相等，则更新
                 if (!addrs.equals(this.nameSrvAddr)) {
                     log.info("name server address changed, old: {} new: {}", this.nameSrvAddr, addrs);
                     this.updateNameServerAddressList(addrs);
@@ -87,13 +96,19 @@ public class BrokerOuterAPI {
         return nameSrvAddr;
     }
 
+    /**
+     * 更新nameserver 地址
+     * @param addrs     nameserver 地址列表
+     * @return void      
+     * @throws
+     */
     public void updateNameServerAddressList(final String addrs) {
         List<String> lst = new ArrayList<String>();
         String[] addrArray = addrs.split(";");
         for (String addr : addrArray) {
             lst.add(addr);
         }
-
+        //远程客户端更新nameserver
         this.remotingClient.updateNameServerAddressList(lst);
     }
 
@@ -231,6 +246,18 @@ public class BrokerOuterAPI {
         throw new MQBrokerException(response.getCode(), response.getRemark());
     }
 
+    /**
+     * broker 外发 去获取主题配置  主地址
+     * @param addr
+     * @return
+     * @throws RemotingConnectException
+     * @throws RemotingSendRequestException
+     * @throws RemotingTimeoutException
+     * @throws InterruptedException
+     * @throws MQBrokerException     
+     * @return TopicConfigSerializeWrapper      
+     * @throws
+     */
     public TopicConfigSerializeWrapper getAllTopicConfig(
         final String addr) throws RemotingConnectException, RemotingSendRequestException,
         RemotingTimeoutException, InterruptedException, MQBrokerException {
@@ -238,6 +265,7 @@ public class BrokerOuterAPI {
 
         RemotingCommand response = this.remotingClient.invokeSync(MixAll.brokerVIPChannel(true, addr), request, 3000);
         assert response != null;
+        //成功后解析数据
         switch (response.getCode()) {
             case ResponseCode.SUCCESS: {
                 return TopicConfigSerializeWrapper.decode(response.getBody(), TopicConfigSerializeWrapper.class);
@@ -248,7 +276,18 @@ public class BrokerOuterAPI {
 
         throw new MQBrokerException(response.getCode(), response.getRemark());
     }
-
+    /**
+     * broker 外发 去获取消费者偏移量
+     * @param addr 主地址
+     * @return
+     * @throws InterruptedException
+     * @throws RemotingTimeoutException
+     * @throws RemotingSendRequestException
+     * @throws RemotingConnectException
+     * @throws MQBrokerException     
+     * @return ConsumerOffsetSerializeWrapper      
+     * @throws
+     */
     public ConsumerOffsetSerializeWrapper getAllConsumerOffset(
         final String addr) throws InterruptedException, RemotingTimeoutException,
         RemotingSendRequestException, RemotingConnectException, MQBrokerException {
@@ -266,6 +305,19 @@ public class BrokerOuterAPI {
         throw new MQBrokerException(response.getCode(), response.getRemark());
     }
 
+    /**
+     * 获取同步偏移量
+     * @param addr
+     * @return
+     * @throws InterruptedException
+     * @throws RemotingTimeoutException
+     * @throws RemotingSendRequestException
+     * @throws RemotingConnectException
+     * @throws MQBrokerException
+     * @throws UnsupportedEncodingException     
+     * @return String      
+     * @throws
+     */
     public String getAllDelayOffset(
         final String addr) throws InterruptedException, RemotingTimeoutException, RemotingSendRequestException,
         RemotingConnectException, MQBrokerException, UnsupportedEncodingException {
@@ -283,6 +335,7 @@ public class BrokerOuterAPI {
         throw new MQBrokerException(response.getCode(), response.getRemark());
     }
 
+    //获取订阅组配置信息类
     public SubscriptionGroupWrapper getAllSubscriptionGroupConfig(
         final String addr) throws InterruptedException, RemotingTimeoutException,
         RemotingSendRequestException, RemotingConnectException, MQBrokerException {

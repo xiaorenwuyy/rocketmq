@@ -51,13 +51,18 @@ import java.net.SocketAddress;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-
+/**
+ * 发送消息处理器
+ * @author yuyang
+ * @date 2018年5月30日
+ */
 public abstract class AbstractSendMessageProcessor implements NettyRequestProcessor {
     protected static final Logger log = LoggerFactory.getLogger(LoggerName.BROKER_LOGGER_NAME);
 
     protected final static int DLQ_NUMS_PER_GROUP = 1;
     protected final BrokerController brokerController;
     protected final Random random = new Random(System.currentTimeMillis());
+    //存储host
     protected final SocketAddress storeHost;
     private List<SendMessageHook> sendMessageHookList;
 
@@ -229,6 +234,12 @@ public abstract class AbstractSendMessageProcessor implements NettyRequestProces
         return response;
     }
 
+    /**
+     * 注册发送消息钩子列表
+     * @param sendMessageHookList   发送消息钩子列表  
+     * @return void      
+     * @throws
+     */
     public void registerSendMessageHook(List<SendMessageHook> sendMessageHookList) {
         this.sendMessageHookList = sendMessageHookList;
     }

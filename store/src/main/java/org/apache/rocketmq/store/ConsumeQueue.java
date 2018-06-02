@@ -23,26 +23,42 @@ import org.apache.rocketmq.common.constant.LoggerName;
 import org.apache.rocketmq.store.config.StorePathConfigHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * 消费者队列
+ * @author yuyang
+ * @date 2018年5月30日
+ */
 public class ConsumeQueue {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
 
+    //存储单元大小
     public static final int CQ_STORE_UNIT_SIZE = 20;
     private static final Logger LOG_ERROR = LoggerFactory.getLogger(LoggerName.STORE_ERROR_LOGGER_NAME);
 
     private final DefaultMessageStore defaultMessageStore;
 
+    //映射文件队列
     private final MappedFileQueue mappedFileQueue;
     private final String topic;
     private final int queueId;
+    //缓冲区
     private final ByteBuffer byteBufferIndex;
 
     private final String storePath;
     private final int mappedFileSize;
     private long maxPhysicOffset = -1;
     private volatile long minLogicOffset = 0;
+    //消费者队列扩展类
     private ConsumeQueueExt consumeQueueExt = null;
 
+    /**
+     * 
+     * @param topic  主题
+     * @param queueId 队列id
+     * @param storePath  存储路径
+     * @param mappedFileSize  映射文件大小
+     * @param defaultMessageStore 默认的消息中心
+     */
     public ConsumeQueue(
         final String topic,
         final int queueId,
@@ -60,16 +76,18 @@ public class ConsumeQueue {
             + File.separator + topic
             + File.separator + queueId;
 
+        //映射文件队列
         this.mappedFileQueue = new MappedFileQueue(queueDir, mappedFileSize, null);
 
         this.byteBufferIndex = ByteBuffer.allocate(CQ_STORE_UNIT_SIZE);
-
+        
+        //消费者队列扩展
         if (defaultMessageStore.getMessageStoreConfig().isEnableConsumeQueueExt()) {
             this.consumeQueueExt = new ConsumeQueueExt(
                 topic,
                 queueId,
                 StorePathConfigHelper.getStorePathConsumeQueueExt(defaultMessageStore.getMessageStoreConfig().getStorePathRootDir()),
-                defaultMessageStore.getMessageStoreConfig().getMappedFileSizeConsumeQueueExt(),
+                defaultMessageStore.getMessageStoreConfig().getMappedFileSizeConsumeQueueExt(),//映射文件大小
                 defaultMessageStore.getMessageStoreConfig().getBitMapLengthConsumeQueueExt()
             );
         }
@@ -320,7 +338,15 @@ public class ConsumeQueue {
         return lastOffset;
     }
 
+    /**
+     * 刷新消费者队列
+     * @param flushLeastPages 最后一页
+     * @return     
+     * @return boolean      
+     * @throws
+     */
     public boolean flush(final int flushLeastPages) {
+    	//映射文件刷新
         boolean result = this.mappedFileQueue.flush(flushLeastPages);
         if (isExtReadEnable()) {
             result = result & this.consumeQueueExt.flush(flushLeastPages);
@@ -375,17 +401,25 @@ public class ConsumeQueue {
         return this.minLogicOffset / CQ_STORE_UNIT_SIZE;
     }
 
+    /**
+     * 把消息点包类
+     * @param request     分发请求
+     * @return void      
+     * @throws
+     */
     public void putMessagePositionInfoWrapper(DispatchRequest request) {
         final int maxRetries = 30;
         boolean canWrite = this.defaultMessageStore.getRunningFlags().isCQWriteable();
         for (int i = 0; i < maxRetries && canWrite; i++) {
             long tagsCode = request.getTagsCode();
+            //todo comment
             if (isExtWriteEnable()) {
+            	//扩展单元
                 ConsumeQueueExt.CqExtUnit cqExtUnit = new ConsumeQueueExt.CqExtUnit();
                 cqExtUnit.setFilterBitMap(request.getBitMap());
                 cqExtUnit.setMsgStoreTime(request.getStoreTimestamp());
                 cqExtUnit.setTagsCode(request.getTagsCode());
-
+                //todo comment
                 long extAddr = this.consumeQueueExt.put(cqExtUnit);
                 if (isExtAddr(extAddr)) {
                     tagsCode = extAddr;
@@ -397,6 +431,7 @@ public class ConsumeQueue {
             boolean result = this.putMessagePositionInfo(request.getCommitLogOffset(),
                 request.getMsgSize(), tagsCode, request.getConsumeQueueOffset());
             if (result) {
+            	//todo comment
                 this.defaultMessageStore.getStoreCheckpoint().setLogicsMsgTimestamp(request.getStoreTimestamp());
                 return;
             } else {
@@ -482,6 +517,13 @@ public class ConsumeQueue {
         }
     }
 
+    /**
+     * 获取索引
+     * @param startIndex
+     * @return     
+     * @return SelectMappedBufferResult      
+     * @throws
+     */
     public SelectMappedBufferResult getIndexBuffer(final long startIndex) {
         int mappedFileSize = this.mappedFileSize;
         long offset = startIndex * CQ_STORE_UNIT_SIZE;
@@ -556,6 +598,7 @@ public class ConsumeQueue {
         return this.mappedFileQueue.getMaxOffset() / CQ_STORE_UNIT_SIZE;
     }
 
+    //消费者队列检查 调用的是映射文件队列检查
     public void checkSelf() {
         mappedFileQueue.checkSelf();
         if (isExtReadEnable()) {
@@ -567,6 +610,7 @@ public class ConsumeQueue {
         return this.consumeQueueExt != null;
     }
 
+    //是否可写
     protected boolean isExtWriteEnable() {
         return this.consumeQueueExt != null
             && this.defaultMessageStore.getMessageStoreConfig().isEnableConsumeQueueExt();
